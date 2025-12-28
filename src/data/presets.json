@@ -1,0 +1,532 @@
+{
+    "presets": [
+        {
+            "id": "drive_exposure",
+            "name": "Google Drive Exposure",
+            "description": "Find publicly shared Google Drive documents, spreadsheets, and folders",
+            "category": "cloud_exposure",
+            "riskLevel": "medium",
+            "icon": "☁️",
+            "tags": [
+                "cloud",
+                "google",
+                "documents",
+                "sharing"
+            ],
+            "defaultAST": {
+                "type": "ROOT",
+                "id": "preset_drive",
+                "children": [
+                    {
+                        "type": "PLATFORM",
+                        "id": "p1",
+                        "value": "drive"
+                    },
+                    {
+                        "type": "OR",
+                        "id": "o1",
+                        "children": [
+                            {
+                                "type": "INURL",
+                                "id": "i1",
+                                "values": [
+                                    "/file/d/",
+                                    "/folders/",
+                                    "/spreadsheets/d/"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "preset": "drive_exposure",
+                    "createdAt": ""
+                }
+            },
+            "exampleInputs": [
+                "confidential",
+                "budget 2024",
+                "employee list"
+            ],
+            "exampleRenderedQuery": "site:drive.google.com (inurl:\"/file/d/\" OR inurl:\"/folders/\" OR inurl:\"/spreadsheets/d/\") \"confidential\""
+        },
+        {
+            "id": "s3_buckets",
+            "name": "AWS S3 Bucket Discovery",
+            "description": "Identify exposed S3 buckets and their contents",
+            "category": "cloud_exposure",
+            "riskLevel": "high",
+            "icon": "🪣",
+            "tags": [
+                "cloud",
+                "aws",
+                "s3",
+                "storage"
+            ],
+            "defaultAST": {
+                "type": "ROOT",
+                "id": "preset_s3",
+                "children": [
+                    {
+                        "type": "SITE",
+                        "id": "s1",
+                        "domains": [
+                            "s3.amazonaws.com",
+                            "*.s3.amazonaws.com"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "id": "o1",
+                        "children": [
+                            {
+                                "type": "INTITLE",
+                                "id": "t1",
+                                "values": [
+                                    "index of",
+                                    "bucket"
+                                ]
+                            },
+                            {
+                                "type": "INURL",
+                                "id": "u1",
+                                "values": [
+                                    ".xml",
+                                    "ListBucketResult"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "preset": "s3_buckets",
+                    "createdAt": ""
+                }
+            },
+            "exampleInputs": [
+                "backup",
+                "database",
+                "prod"
+            ],
+            "exampleRenderedQuery": "(site:s3.amazonaws.com OR site:*.s3.amazonaws.com) (intitle:\"index of\" OR intitle:\"bucket\" OR inurl:\".xml\")"
+        },
+        {
+            "id": "network_cameras",
+            "name": "Network Camera Interfaces",
+            "description": "Discover exposed IP camera web interfaces",
+            "category": "iot_exposure",
+            "riskLevel": "medium",
+            "icon": "📷",
+            "tags": [
+                "iot",
+                "cameras",
+                "webcam",
+                "surveillance"
+            ],
+            "defaultAST": {
+                "type": "ROOT",
+                "id": "preset_cameras",
+                "children": [
+                    {
+                        "type": "OR",
+                        "id": "o1",
+                        "children": [
+                            {
+                                "type": "INTITLE",
+                                "id": "t1",
+                                "values": [
+                                    "webcamXP",
+                                    "IP Camera",
+                                    "Network Camera",
+                                    "Live View",
+                                    "AXIS"
+                                ]
+                            },
+                            {
+                                "type": "INURL",
+                                "id": "u1",
+                                "values": [
+                                    "view.shtml",
+                                    "ViewerFrame",
+                                    "axis-cgi",
+                                    "mjpg/video.mjpg"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "preset": "network_cameras",
+                    "createdAt": ""
+                }
+            },
+            "exampleInputs": [
+                "parking",
+                "office",
+                "warehouse"
+            ],
+            "exampleRenderedQuery": "(intitle:\"webcamXP\" OR intitle:\"IP Camera\" OR intitle:\"Network Camera\" OR inurl:\"view.shtml\" OR inurl:\"ViewerFrame\")"
+        },
+        {
+            "id": "open_indexes",
+            "name": "Open Directory Indexes",
+            "description": "Find web servers with directory listing enabled",
+            "category": "misconfiguration",
+            "riskLevel": "low",
+            "icon": "📂",
+            "tags": [
+                "directory",
+                "index",
+                "listing",
+                "files"
+            ],
+            "defaultAST": {
+                "type": "ROOT",
+                "id": "preset_indexes",
+                "children": [
+                    {
+                        "type": "INTITLE",
+                        "id": "t1",
+                        "values": [
+                            "index of"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "id": "o1",
+                        "children": [
+                            {
+                                "type": "PHRASE",
+                                "id": "p1",
+                                "value": "parent directory"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "id": "p2",
+                                "value": "last modified"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "id": "p3",
+                                "value": "size"
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "preset": "open_indexes",
+                    "createdAt": ""
+                }
+            },
+            "exampleInputs": [
+                "mp3",
+                "mp4",
+                "pdf",
+                "backup"
+            ],
+            "exampleRenderedQuery": "intitle:\"index of\" (\"parent directory\" OR \"last modified\" OR \"size\")"
+        },
+        {
+            "id": "config_files",
+            "name": "Configuration File Exposure",
+            "description": "Locate exposed configuration files with sensitive settings",
+            "category": "sensitive_files",
+            "riskLevel": "critical",
+            "icon": "⚙️",
+            "tags": [
+                "config",
+                "env",
+                "yaml",
+                "settings",
+                "secrets"
+            ],
+            "defaultAST": {
+                "type": "ROOT",
+                "id": "preset_config",
+                "children": [
+                    {
+                        "type": "FILETYPE",
+                        "id": "f1",
+                        "types": [
+                            "env",
+                            "yml",
+                            "yaml",
+                            "conf",
+                            "cfg",
+                            "ini"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "id": "o1",
+                        "children": [
+                            {
+                                "type": "INURL",
+                                "id": "u1",
+                                "values": [
+                                    ".env",
+                                    "config",
+                                    "settings"
+                                ]
+                            },
+                            {
+                                "type": "INTEXT",
+                                "id": "t1",
+                                "values": [
+                                    "DB_PASSWORD",
+                                    "API_KEY",
+                                    "SECRET"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "preset": "config_files",
+                    "createdAt": ""
+                }
+            },
+            "exampleInputs": [
+                "example.com",
+                "target.org"
+            ],
+            "exampleRenderedQuery": "(filetype:env OR filetype:yml OR filetype:yaml OR filetype:conf) (inurl:\".env\" OR inurl:\"config\" OR intext:\"DB_PASSWORD\" OR intext:\"API_KEY\")"
+        },
+        {
+            "id": "credential_exposure",
+            "name": "Credential Leakage Discovery",
+            "description": "Find exposed password files and authentication configs (authorized testing only)",
+            "category": "credentials",
+            "riskLevel": "critical",
+            "icon": "🔐",
+            "tags": [
+                "password",
+                "credentials",
+                "auth",
+                "leak"
+            ],
+            "defaultAST": {
+                "type": "ROOT",
+                "id": "preset_creds",
+                "children": [
+                    {
+                        "type": "FILETYPE",
+                        "id": "f1",
+                        "types": [
+                            "txt",
+                            "log",
+                            "sql",
+                            "csv"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "id": "o1",
+                        "children": [
+                            {
+                                "type": "INTEXT",
+                                "id": "t1",
+                                "values": [
+                                    "password",
+                                    "passwd",
+                                    "pwd"
+                                ]
+                            },
+                            {
+                                "type": "INTITLE",
+                                "id": "i1",
+                                "values": [
+                                    "password",
+                                    "credentials"
+                                ]
+                            },
+                            {
+                                "type": "INURL",
+                                "id": "u1",
+                                "values": [
+                                    "passwords",
+                                    "credentials",
+                                    "auth"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "preset": "credential_exposure",
+                    "createdAt": ""
+                }
+            },
+            "exampleInputs": [
+                "example.com"
+            ],
+            "exampleRenderedQuery": "(filetype:txt OR filetype:log OR filetype:sql) (intext:\"password\" OR intext:\"passwd\" OR intitle:\"password\" OR inurl:\"passwords\")"
+        },
+        {
+            "id": "backup_files",
+            "name": "Backup File Discovery",
+            "description": "Locate exposed backup files and database dumps",
+            "category": "sensitive_files",
+            "riskLevel": "high",
+            "icon": "💾",
+            "tags": [
+                "backup",
+                "dump",
+                "sql",
+                "archive",
+                "tar",
+                "zip"
+            ],
+            "defaultAST": {
+                "type": "ROOT",
+                "id": "preset_backups",
+                "children": [
+                    {
+                        "type": "FILETYPE",
+                        "id": "f1",
+                        "types": [
+                            "sql",
+                            "bak",
+                            "backup",
+                            "dump",
+                            "tar.gz",
+                            "zip"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "id": "o1",
+                        "children": [
+                            {
+                                "type": "INTITLE",
+                                "id": "t1",
+                                "values": [
+                                    "index of",
+                                    "backup"
+                                ]
+                            },
+                            {
+                                "type": "INURL",
+                                "id": "u1",
+                                "values": [
+                                    "backup",
+                                    "dump",
+                                    "db_backup",
+                                    "export"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "preset": "backup_files",
+                    "createdAt": ""
+                }
+            },
+            "exampleInputs": [
+                "example.com",
+                "2024"
+            ],
+            "exampleRenderedQuery": "(filetype:sql OR filetype:bak OR filetype:backup OR filetype:tar.gz) (intitle:\"index of\" OR inurl:\"backup\" OR inurl:\"dump\")"
+        },
+        {
+            "id": "personnel_osint",
+            "name": "Personnel Intelligence",
+            "description": "Gather information about organization personnel from professional networks",
+            "category": "personnel",
+            "riskLevel": "low",
+            "icon": "👤",
+            "tags": [
+                "linkedin",
+                "github",
+                "twitter",
+                "personnel",
+                "employees"
+            ],
+            "defaultAST": {
+                "type": "ROOT",
+                "id": "preset_personnel",
+                "children": [
+                    {
+                        "type": "SITE",
+                        "id": "s1",
+                        "domains": [
+                            "linkedin.com/in",
+                            "github.com",
+                            "twitter.com"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "id": "o1",
+                        "children": [
+                            {
+                                "type": "PHRASE",
+                                "id": "p1",
+                                "value": "software engineer"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "id": "p2",
+                                "value": "security"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "id": "p3",
+                                "value": "devops"
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "preset": "personnel_osint",
+                    "createdAt": ""
+                }
+            },
+            "exampleInputs": [
+                "Example Corp",
+                "CISO",
+                "CTO"
+            ],
+            "exampleRenderedQuery": "(site:linkedin.com/in OR site:github.com) \"Example Corp\" (\"CISO\" OR \"security\" OR \"information security\")"
+        }
+    ],
+    "presetCategories": [
+        {
+            "id": "cloud_exposure",
+            "name": "Cloud Exposure",
+            "icon": "☁️",
+            "description": "Cloud storage and platform misconfigurations"
+        },
+        {
+            "id": "iot_exposure",
+            "name": "IoT Exposure",
+            "icon": "📡",
+            "description": "Internet-connected devices and cameras"
+        },
+        {
+            "id": "misconfiguration",
+            "name": "Misconfiguration",
+            "icon": "⚠️",
+            "description": "Server and application misconfigurations"
+        },
+        {
+            "id": "sensitive_files",
+            "name": "Sensitive Files",
+            "icon": "📁",
+            "description": "Exposed configuration and backup files"
+        },
+        {
+            "id": "credentials",
+            "name": "Credentials",
+            "icon": "🔑",
+            "description": "Password and authentication exposure (authorized only)"
+        },
+        {
+            "id": "personnel",
+            "name": "Personnel",
+            "icon": "👥",
+            "description": "Professional network and employee information"
+        }
+    ]
+}

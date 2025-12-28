@@ -1,0 +1,1263 @@
+{
+    "version": "2025.1",
+    "intents": [
+        {
+            "id": "credential_discovery",
+            "name": "Credential Discovery",
+            "description": "Find exposed credentials, API keys, and secrets",
+            "riskLevel": "critical",
+            "investigationPhase": "reconnaissance",
+            "astTemplates": [
+                {
+                    "name": "Environment File Secrets",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "filetype",
+                                "value": "env"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "TERM",
+                                                "id": "t1",
+                                                "value": "DB_PASSWORD"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t2",
+                                                "value": "API_KEY"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t3",
+                                                "value": "SECRET_KEY"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t4",
+                                                "value": "AWS_SECRET"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "credential_discovery",
+                            "category": "credential_leakage",
+                            "riskLevel": "critical",
+                            "legalNotes": [
+                                "Do not use discovered credentials",
+                                "Report via responsible disclosure"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "filetype:env (DB_PASSWORD OR API_KEY OR SECRET_KEY OR AWS_SECRET)",
+                        "bing": "filetype:env (DB_PASSWORD OR API_KEY)",
+                        "duckduckgo": "filetype:env DB_PASSWORD"
+                    }
+                },
+                {
+                    "name": "Exposed Private Keys",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "id": "or1",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "id": "p1",
+                                        "value": "BEGIN RSA PRIVATE KEY"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "id": "p2",
+                                        "value": "BEGIN OPENSSH PRIVATE KEY"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "id": "p3",
+                                        "value": "BEGIN EC PRIVATE KEY"
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "credential_discovery",
+                            "category": "credential_leakage",
+                            "riskLevel": "critical",
+                            "legalNotes": [
+                                "Private key exposure is critical",
+                                "Never use discovered keys"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "\"BEGIN RSA PRIVATE KEY\" OR \"BEGIN OPENSSH PRIVATE KEY\" OR \"BEGIN EC PRIVATE KEY\"",
+                        "bing": "\"BEGIN RSA PRIVATE KEY\" OR \"BEGIN OPENSSH PRIVATE KEY\"",
+                        "duckduckgo": "\"BEGIN RSA PRIVATE KEY\""
+                    }
+                },
+                {
+                    "name": "Database Dumps with Credentials",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "filetype",
+                                "value": "sql"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "id": "p1",
+                                "value": "INSERT INTO"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "TERM",
+                                                "id": "t1",
+                                                "value": "password"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t2",
+                                                "value": "passwd"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t3",
+                                                "value": "user"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "credential_discovery",
+                            "category": "backup_artifacts",
+                            "riskLevel": "critical",
+                            "legalNotes": [
+                                "Database access without authorization is illegal"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "filetype:sql \"INSERT INTO\" (password OR passwd OR user)",
+                        "bing": "filetype:sql \"INSERT INTO\" password",
+                        "duckduckgo": "filetype:sql password"
+                    }
+                }
+            ],
+            "legalGuidance": {
+                "permitted": "Discovery for authorized security assessments",
+                "prohibited": "Using discovered credentials for any purpose",
+                "reportingPath": "Responsible disclosure to affected organization"
+            }
+        },
+        {
+            "id": "infrastructure_mapping",
+            "name": "Infrastructure Mapping",
+            "description": "Map target's digital footprint and technology stack",
+            "riskLevel": "medium",
+            "investigationPhase": "reconnaissance",
+            "astTemplates": [
+                {
+                    "name": "Subdomain Enumeration",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "*.TARGET.com"
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "infrastructure_mapping",
+                            "category": "subdomain_discovery",
+                            "riskLevel": "low",
+                            "legalNotes": [
+                                "Passive reconnaissance only"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:*.TARGET.com",
+                        "bing": "site:TARGET.com",
+                        "duckduckgo": "site:TARGET.com"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "Technology Fingerprinting",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p1",
+                                                "value": "Powered by"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p2",
+                                                "value": "Running on"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t1",
+                                                "value": "Version"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "infrastructure_mapping",
+                            "category": "version_discovery",
+                            "riskLevel": "low",
+                            "legalNotes": [
+                                "Passive information gathering"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com (\"Powered by\" OR \"Running on\" OR Version)",
+                        "bing": "site:TARGET.com \"Powered by\"",
+                        "duckduckgo": "site:TARGET.com \"Powered by\""
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "Server Status Pages",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op2",
+                                                "operator": "inurl",
+                                                "value": "/server-status"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op3",
+                                                "operator": "inurl",
+                                                "value": "/server-info"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op4",
+                                                "operator": "intitle",
+                                                "value": "phpinfo()"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "infrastructure_mapping",
+                            "category": "configuration_files",
+                            "riskLevel": "medium",
+                            "legalNotes": [
+                                "Status pages reveal internal configuration"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com (inurl:/server-status OR inurl:/server-info OR intitle:\"phpinfo()\")",
+                        "bing": "site:TARGET.com inurl:/server-status",
+                        "duckduckgo": "site:TARGET.com inurl:server-status"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "DevOps Infrastructure",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op2",
+                                                "operator": "inurl",
+                                                "value": "jenkins"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op3",
+                                                "operator": "inurl",
+                                                "value": "gitlab"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op4",
+                                                "operator": "inurl",
+                                                "value": "jira"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op5",
+                                                "operator": "inurl",
+                                                "value": "confluence"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "infrastructure_mapping",
+                            "category": "devops_discovery",
+                            "riskLevel": "high",
+                            "legalNotes": [
+                                "DevOps tools may contain sensitive development data"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com (inurl:jenkins OR inurl:gitlab OR inurl:jira OR inurl:confluence)",
+                        "bing": "site:TARGET.com inurl:jenkins",
+                        "duckduckgo": "site:TARGET.com jenkins"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                }
+            ],
+            "legalGuidance": {
+                "permitted": "Passive enumeration of publicly indexed content",
+                "prohibited": "Active scanning, exploitation of discovered services",
+                "reportingPath": "Document for authorized assessment reports"
+            }
+        },
+        {
+            "id": "personnel_osint",
+            "name": "Personnel OSINT",
+            "description": "Gather organizational and personnel information",
+            "riskLevel": "medium",
+            "investigationPhase": "reconnaissance",
+            "astTemplates": [
+                {
+                    "name": "Email Harvesting",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "id": "p1",
+                                "value": "@TARGET.com"
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "personnel_osint",
+                            "category": "personnel_discovery",
+                            "riskLevel": "medium",
+                            "legalNotes": [
+                                "GDPR/CCPA may apply to email collection"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com \"@TARGET.com\"",
+                        "bing": "site:TARGET.com \"@TARGET.com\"",
+                        "duckduckgo": "site:TARGET.com @TARGET.com"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "LinkedIn Employee Discovery",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "linkedin.com/in"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "id": "p1",
+                                "value": "TARGET Company"
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "personnel_osint",
+                            "category": "personnel_discovery",
+                            "riskLevel": "low",
+                            "legalNotes": [
+                                "LinkedIn ToS prohibits automated scraping"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:linkedin.com/in \"TARGET Company\"",
+                        "bing": "site:linkedin.com/in \"TARGET Company\"",
+                        "duckduckgo": "site:linkedin.com \"TARGET Company\""
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "Executive Profiling",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "linkedin.com/in"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "id": "p1",
+                                "value": "TARGET Company"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "TERM",
+                                                "id": "t1",
+                                                "value": "CEO"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t2",
+                                                "value": "CTO"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t3",
+                                                "value": "CISO"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t4",
+                                                "value": "CFO"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "personnel_osint",
+                            "category": "personnel_discovery",
+                            "riskLevel": "medium",
+                            "legalNotes": [
+                                "Executive information for legitimate business intelligence"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:linkedin.com/in \"TARGET Company\" (CEO OR CTO OR CISO OR CFO)",
+                        "bing": "site:linkedin.com/in \"TARGET Company\" CEO",
+                        "duckduckgo": "site:linkedin.com \"TARGET Company\" CEO"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "GitHub Developer Discovery",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "github.com"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "id": "p1",
+                                "value": "@TARGET.com"
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "personnel_osint",
+                            "category": "personnel_discovery",
+                            "riskLevel": "low",
+                            "legalNotes": [
+                                "Public commit history is fair game"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:github.com \"@TARGET.com\"",
+                        "bing": "site:github.com \"@TARGET.com\"",
+                        "duckduckgo": "site:github.com @TARGET.com"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                }
+            ],
+            "legalGuidance": {
+                "permitted": "Collection of publicly available professional information",
+                "prohibited": "Harassment, unauthorized data aggregation, ToS violations",
+                "reportingPath": "Document for social engineering awareness training"
+            }
+        },
+        {
+            "id": "sensitive_document_discovery",
+            "name": "Sensitive Document Discovery",
+            "description": "Find exposed documents, reports, and files",
+            "riskLevel": "high",
+            "investigationPhase": "reconnaissance",
+            "astTemplates": [
+                {
+                    "name": "Confidential Documents",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "OPERATOR",
+                                "id": "op2",
+                                "operator": "filetype",
+                                "value": "pdf"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p1",
+                                                "value": "confidential"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p2",
+                                                "value": "internal only"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p3",
+                                                "value": "not for distribution"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "sensitive_document_discovery",
+                            "category": "document_exposure",
+                            "riskLevel": "high",
+                            "legalNotes": [
+                                "Marked confidential implies expectation of privacy"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com filetype:pdf (\"confidential\" OR \"internal only\" OR \"not for distribution\")",
+                        "bing": "site:TARGET.com filetype:pdf confidential",
+                        "duckduckgo": "site:TARGET.com filetype:pdf confidential"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "Financial Reports",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op2",
+                                                "operator": "filetype",
+                                                "value": "xlsx"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op3",
+                                                "operator": "filetype",
+                                                "value": "xls"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp2",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or2",
+                                        "children": [
+                                            {
+                                                "type": "TERM",
+                                                "id": "t1",
+                                                "value": "budget"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t2",
+                                                "value": "financial"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "id": "t3",
+                                                "value": "revenue"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "sensitive_document_discovery",
+                            "category": "document_exposure",
+                            "riskLevel": "high",
+                            "legalNotes": [
+                                "Financial data may be material non-public information"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com (filetype:xlsx OR filetype:xls) (budget OR financial OR revenue)",
+                        "bing": "site:TARGET.com filetype:xlsx budget",
+                        "duckduckgo": "site:TARGET.com filetype:xlsx budget"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "HR & Personnel Files",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "OPERATOR",
+                                "id": "op2",
+                                "operator": "filetype",
+                                "value": "pdf"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p1",
+                                                "value": "employee handbook"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p2",
+                                                "value": "personnel file"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p3",
+                                                "value": "performance review"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "sensitive_document_discovery",
+                            "category": "document_exposure",
+                            "riskLevel": "critical",
+                            "legalNotes": [
+                                "HR documents contain PII subject to privacy laws"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com filetype:pdf (\"employee handbook\" OR \"personnel file\" OR \"performance review\")",
+                        "bing": "site:TARGET.com filetype:pdf \"employee handbook\"",
+                        "duckduckgo": "site:TARGET.com filetype:pdf employee handbook"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                }
+            ],
+            "legalGuidance": {
+                "permitted": "Discovery for authorized security assessments",
+                "prohibited": "Downloading/distributing confidential documents",
+                "reportingPath": "Report exposure to document owner"
+            }
+        },
+        {
+            "id": "vulnerability_indicators",
+            "name": "Vulnerability Indicators",
+            "description": "Find error messages and misconfigurations indicating vulnerabilities",
+            "riskLevel": "high",
+            "investigationPhase": "reconnaissance",
+            "astTemplates": [
+                {
+                    "name": "SQL Error Exposure",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p1",
+                                                "value": "SQL syntax"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p2",
+                                                "value": "mysql_fetch"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p3",
+                                                "value": "ORA-"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p4",
+                                                "value": "PostgreSQL ERROR"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "vulnerability_indicators",
+                            "category": "vulnerability_indicators",
+                            "riskLevel": "high",
+                            "legalNotes": [
+                                "Indicates potential SQL injection - do not exploit"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com (\"SQL syntax\" OR \"mysql_fetch\" OR \"ORA-\" OR \"PostgreSQL ERROR\")",
+                        "bing": "site:TARGET.com \"SQL syntax\"",
+                        "duckduckgo": "site:TARGET.com \"SQL syntax\""
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "Debug Mode Detection",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p1",
+                                                "value": "DEBUG = True"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p2",
+                                                "value": "stack trace"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "id": "p3",
+                                                "value": "Traceback (most recent call last)"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "vulnerability_indicators",
+                            "category": "vulnerability_indicators",
+                            "riskLevel": "high",
+                            "legalNotes": [
+                                "Debug mode exposes application internals"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com (\"DEBUG = True\" OR \"stack trace\" OR \"Traceback (most recent call last)\")",
+                        "bing": "site:TARGET.com \"DEBUG = True\"",
+                        "duckduckgo": "site:TARGET.com \"stack trace\""
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "Exposed Admin Panels",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op2",
+                                                "operator": "inurl",
+                                                "value": "/admin"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op3",
+                                                "operator": "inurl",
+                                                "value": "/wp-admin"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op4",
+                                                "operator": "inurl",
+                                                "value": "phpmyadmin"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "OPERATOR",
+                                "id": "op5",
+                                "operator": "intitle",
+                                "value": "login"
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "vulnerability_indicators",
+                            "category": "login_panels",
+                            "riskLevel": "high",
+                            "legalNotes": [
+                                "Admin panel discovery only - do not attempt login"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com (inurl:/admin OR inurl:/wp-admin OR inurl:phpmyadmin) intitle:login",
+                        "bing": "site:TARGET.com inurl:admin intitle:login",
+                        "duckduckgo": "site:TARGET.com inurl:admin"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                }
+            ],
+            "legalGuidance": {
+                "permitted": "Discovery for authorized penetration testing",
+                "prohibited": "Exploitation of discovered vulnerabilities",
+                "reportingPath": "Document in assessment report; recommend remediation"
+            }
+        },
+        {
+            "id": "configuration_exposure",
+            "name": "Configuration Exposure",
+            "description": "Find exposed configuration files and infrastructure details",
+            "riskLevel": "critical",
+            "investigationPhase": "reconnaissance",
+            "astTemplates": [
+                {
+                    "name": "Environment Files",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "OPERATOR",
+                                "id": "op2",
+                                "operator": "inurl",
+                                "value": "/.env"
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "configuration_exposure",
+                            "category": "configuration_files",
+                            "riskLevel": "critical",
+                            "legalNotes": [
+                                ".env files contain application secrets"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com inurl:/.env",
+                        "bing": "site:TARGET.com inurl:.env",
+                        "duckduckgo": "site:TARGET.com inurl:.env"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "Git Repository Exposure",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op2",
+                                                "operator": "inurl",
+                                                "value": "/.git/config"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op3",
+                                                "operator": "inurl",
+                                                "value": "/.git/HEAD"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "configuration_exposure",
+                            "category": "open_directories",
+                            "riskLevel": "critical",
+                            "legalNotes": [
+                                "Exposed .git allows full source code recovery"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com (inurl:/.git/config OR inurl:/.git/HEAD)",
+                        "bing": "site:TARGET.com inurl:.git/config",
+                        "duckduckgo": "site:TARGET.com inurl:.git"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                },
+                {
+                    "name": "Cloud Credentials",
+                    "ast": {
+                        "type": "ROOT",
+                        "id": "root",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "id": "op1",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "GROUP",
+                                "id": "grp1",
+                                "children": [
+                                    {
+                                        "type": "OR",
+                                        "id": "or1",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op2",
+                                                "operator": "inurl",
+                                                "value": ".aws/credentials"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op3",
+                                                "operator": "inurl",
+                                                "value": ".kube/config"
+                                            },
+                                            {
+                                                "type": "OPERATOR",
+                                                "id": "op4",
+                                                "operator": "filetype",
+                                                "value": "tfstate"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "metadata": {
+                            "intent": "configuration_exposure",
+                            "category": "configuration_files",
+                            "riskLevel": "critical",
+                            "legalNotes": [
+                                "Cloud credentials provide infrastructure access"
+                            ]
+                        }
+                    },
+                    "renders": {
+                        "google": "site:TARGET.com (inurl:.aws/credentials OR inurl:.kube/config OR filetype:tfstate)",
+                        "bing": "site:TARGET.com inurl:.aws/credentials",
+                        "duckduckgo": "site:TARGET.com aws credentials"
+                    },
+                    "variables": [
+                        "TARGET"
+                    ]
+                }
+            ],
+            "legalGuidance": {
+                "permitted": "Discovery for authorized assessments",
+                "prohibited": "Accessing systems using discovered configurations",
+                "reportingPath": "Immediate responsible disclosure due to critical risk"
+            }
+        }
+    ],
+    "intentMapping": {
+        "categories_to_intents": {
+            "credential_leakage": [
+                "credential_discovery",
+                "configuration_exposure"
+            ],
+            "open_directories": [
+                "infrastructure_mapping",
+                "credential_discovery"
+            ],
+            "configuration_files": [
+                "configuration_exposure",
+                "vulnerability_indicators"
+            ],
+            "backup_artifacts": [
+                "credential_discovery",
+                "sensitive_document_discovery"
+            ],
+            "login_panels": [
+                "vulnerability_indicators",
+                "infrastructure_mapping"
+            ],
+            "document_exposure": [
+                "sensitive_document_discovery",
+                "personnel_osint"
+            ],
+            "personnel_discovery": [
+                "personnel_osint"
+            ],
+            "cloud_exposure": [
+                "configuration_exposure",
+                "credential_discovery"
+            ],
+            "vulnerability_indicators": [
+                "vulnerability_indicators"
+            ]
+        },
+        "risk_hierarchy": [
+            {
+                "level": "critical",
+                "intents": [
+                    "credential_discovery",
+                    "configuration_exposure"
+                ]
+            },
+            {
+                "level": "high",
+                "intents": [
+                    "vulnerability_indicators",
+                    "sensitive_document_discovery"
+                ]
+            },
+            {
+                "level": "medium",
+                "intents": [
+                    "personnel_osint",
+                    "infrastructure_mapping"
+                ]
+            },
+            {
+                "level": "low",
+                "intents": []
+            }
+        ]
+    }
+}

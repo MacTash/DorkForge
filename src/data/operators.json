@@ -1,0 +1,736 @@
+{
+    "version": "2025.1",
+    "operators": [
+        {
+            "name": "site",
+            "syntax": "site:domain.com",
+            "description": "Restricts results to a specific domain or TLD",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "site:"
+                },
+                "bing": {
+                    "supported": true,
+                    "syntax": "site:"
+                },
+                "duckduckgo": {
+                    "supported": true,
+                    "syntax": "site:"
+                }
+            },
+            "examples": [
+                {
+                    "query": "site:gov.uk",
+                    "description": "All .gov.uk pages"
+                },
+                {
+                    "query": "site:*.target.com",
+                    "description": "All subdomains"
+                },
+                {
+                    "query": "-site:www.target.com",
+                    "description": "Exclude www subdomain"
+                }
+            ],
+            "quirks": [
+                "Implicit subdomain inclusion (site:target.com includes *.target.com)",
+                "Multiple site: operators create OR, not AND",
+                "Can be negated with -site:",
+                "TLD search: site:.edu returns all .edu domains"
+            ],
+            "category": "scope"
+        },
+        {
+            "name": "inurl",
+            "syntax": "inurl:keyword",
+            "description": "Matches pages where URL contains keyword",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "inurl:"
+                },
+                "bing": {
+                    "supported": true,
+                    "syntax": "inurl:",
+                    "notes": "More limited than Google"
+                },
+                "duckduckgo": {
+                    "supported": true,
+                    "syntax": "inurl:",
+                    "notes": "Basic support only"
+                }
+            },
+            "examples": [
+                {
+                    "query": "inurl:admin",
+                    "description": "URLs containing 'admin'"
+                },
+                {
+                    "query": "inurl:/wp-content/",
+                    "description": "WordPress content paths"
+                },
+                {
+                    "query": "inurl:id=",
+                    "description": "URLs with id parameter"
+                }
+            ],
+            "quirks": [
+                "Matches anywhere in URL path, query, or fragment",
+                "Multiple inurl: operators are ANDed",
+                "Case-insensitive matching",
+                "Does not match protocol (http/https)"
+            ],
+            "category": "location"
+        },
+        {
+            "name": "allinurl",
+            "syntax": "allinurl:word1 word2",
+            "description": "All words must appear in URL",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "allinurl:",
+                    "notes": "Exclusive operator"
+                },
+                "bing": {
+                    "supported": false
+                },
+                "duckduckgo": {
+                    "supported": false
+                }
+            },
+            "examples": [
+                {
+                    "query": "allinurl:admin login panel",
+                    "description": "All terms in URL"
+                }
+            ],
+            "quirks": [
+                "EXCLUSIVE: Cannot combine with other operators",
+                "Use multiple inurl: for flexibility",
+                "All following terms apply to URL only"
+            ],
+            "category": "location"
+        },
+        {
+            "name": "intitle",
+            "syntax": "intitle:keyword",
+            "description": "Matches pages where title contains keyword",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "intitle:"
+                },
+                "bing": {
+                    "supported": true,
+                    "syntax": "intitle:"
+                },
+                "duckduckgo": {
+                    "supported": true,
+                    "syntax": "intitle:"
+                }
+            },
+            "examples": [
+                {
+                    "query": "intitle:\"index of\"",
+                    "description": "Directory listings"
+                },
+                {
+                    "query": "intitle:login intitle:admin",
+                    "description": "Both in title (AND)"
+                }
+            ],
+            "quirks": [
+                "Matches HTML <title> tag content",
+                "Multiple intitle: operators are ANDed",
+                "Case-insensitive",
+                "Phrase matching requires quotes"
+            ],
+            "category": "location"
+        },
+        {
+            "name": "allintitle",
+            "syntax": "allintitle:word1 word2",
+            "description": "All words must appear in title",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "allintitle:",
+                    "notes": "Exclusive operator"
+                },
+                "bing": {
+                    "supported": false
+                },
+                "duckduckgo": {
+                    "supported": false
+                }
+            },
+            "examples": [
+                {
+                    "query": "allintitle:password reset portal",
+                    "description": "All terms in title"
+                }
+            ],
+            "quirks": [
+                "EXCLUSIVE: Cannot combine with other operators",
+                "Use multiple intitle: for flexibility"
+            ],
+            "category": "location"
+        },
+        {
+            "name": "intext",
+            "syntax": "intext:keyword",
+            "description": "Matches pages where body text contains keyword",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "intext:"
+                },
+                "bing": {
+                    "supported": true,
+                    "syntax": "inbody:",
+                    "notes": "Bing uses inbody: instead"
+                },
+                "duckduckgo": {
+                    "supported": false,
+                    "notes": "No direct equivalent"
+                }
+            },
+            "examples": [
+                {
+                    "query": "intext:\"internal use only\"",
+                    "description": "Phrase in body"
+                },
+                {
+                    "query": "intext:password filetype:txt",
+                    "description": "Password in text files"
+                }
+            ],
+            "quirks": [
+                "Default behavior for unqualified terms",
+                "Can find hidden content (comments, hidden divs)",
+                "Bing equivalent is inbody:"
+            ],
+            "category": "location"
+        },
+        {
+            "name": "allintext",
+            "syntax": "allintext:word1 word2",
+            "description": "All words must appear in body text",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "allintext:",
+                    "notes": "Exclusive operator"
+                },
+                "bing": {
+                    "supported": false
+                },
+                "duckduckgo": {
+                    "supported": false
+                }
+            },
+            "examples": [
+                {
+                    "query": "allintext:username password login",
+                    "description": "All terms in body"
+                }
+            ],
+            "quirks": [
+                "EXCLUSIVE: Cannot combine with other operators"
+            ],
+            "category": "location"
+        },
+        {
+            "name": "filetype",
+            "syntax": "filetype:ext",
+            "description": "Restricts results to specific file extension",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "filetype:"
+                },
+                "bing": {
+                    "supported": true,
+                    "syntax": "filetype:"
+                },
+                "duckduckgo": {
+                    "supported": true,
+                    "syntax": "filetype:"
+                }
+            },
+            "examples": [
+                {
+                    "query": "filetype:pdf",
+                    "description": "PDF documents"
+                },
+                {
+                    "query": "filetype:sql password",
+                    "description": "SQL files with password"
+                },
+                {
+                    "query": "filetype:env",
+                    "description": "Environment files"
+                }
+            ],
+            "commonTypes": [
+                {
+                    "ext": "pdf",
+                    "description": "PDF documents"
+                },
+                {
+                    "ext": "doc",
+                    "description": "Word 97-2003"
+                },
+                {
+                    "ext": "docx",
+                    "description": "Word documents"
+                },
+                {
+                    "ext": "xls",
+                    "description": "Excel 97-2003"
+                },
+                {
+                    "ext": "xlsx",
+                    "description": "Excel spreadsheets"
+                },
+                {
+                    "ext": "ppt",
+                    "description": "PowerPoint 97-2003"
+                },
+                {
+                    "ext": "pptx",
+                    "description": "PowerPoint presentations"
+                },
+                {
+                    "ext": "txt",
+                    "description": "Plain text"
+                },
+                {
+                    "ext": "csv",
+                    "description": "Comma-separated values"
+                },
+                {
+                    "ext": "xml",
+                    "description": "XML files"
+                },
+                {
+                    "ext": "json",
+                    "description": "JSON files"
+                },
+                {
+                    "ext": "sql",
+                    "description": "SQL dumps"
+                },
+                {
+                    "ext": "log",
+                    "description": "Log files"
+                },
+                {
+                    "ext": "conf",
+                    "description": "Configuration files"
+                },
+                {
+                    "ext": "ini",
+                    "description": "INI configuration"
+                },
+                {
+                    "ext": "env",
+                    "description": "Environment files"
+                },
+                {
+                    "ext": "yml",
+                    "description": "YAML files"
+                },
+                {
+                    "ext": "yaml",
+                    "description": "YAML files"
+                },
+                {
+                    "ext": "bak",
+                    "description": "Backup files"
+                },
+                {
+                    "ext": "old",
+                    "description": "Old/legacy files"
+                }
+            ],
+            "quirks": [
+                "Based on file extension, not MIME type",
+                "ext: is undocumented alias",
+                "Not all extensions are indexed",
+                "Combine with site: for targeted searches"
+            ],
+            "category": "content"
+        },
+        {
+            "name": "ext",
+            "syntax": "ext:extension",
+            "description": "Alias for filetype",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "ext:",
+                    "notes": "Undocumented alias for filetype:"
+                },
+                "bing": {
+                    "supported": true,
+                    "syntax": "ext:"
+                },
+                "duckduckgo": {
+                    "supported": true,
+                    "syntax": "ext:"
+                }
+            },
+            "examples": [
+                {
+                    "query": "ext:sql",
+                    "description": "Equivalent to filetype:sql"
+                }
+            ],
+            "quirks": [
+                "Functionally identical to filetype:",
+                "Less commonly used but equally valid"
+            ],
+            "category": "content"
+        },
+        {
+            "name": "cache",
+            "syntax": "cache:url",
+            "description": "Shows Google's cached version of a page",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "cache:",
+                    "notes": "Functionality being reduced in 2025"
+                },
+                "bing": {
+                    "supported": false
+                },
+                "duckduckgo": {
+                    "supported": false
+                }
+            },
+            "examples": [
+                {
+                    "query": "cache:example.com/page.html",
+                    "description": "Cached version"
+                }
+            ],
+            "quirks": [
+                "Being deprecated - Google now links to Internet Archive",
+                "Cache availability varies by page",
+                "Some sites opt out via robots.txt",
+                "Useful for viewing removed content"
+            ],
+            "category": "meta",
+            "deprecated": true,
+            "deprecationNote": "Google is transitioning to Internet Archive links in 2025"
+        },
+        {
+            "name": "related",
+            "syntax": "related:domain.com",
+            "description": "Finds websites similar to specified domain",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "related:"
+                },
+                "bing": {
+                    "supported": false
+                },
+                "duckduckgo": {
+                    "supported": false
+                }
+            },
+            "examples": [
+                {
+                    "query": "related:target.com",
+                    "description": "Similar websites"
+                }
+            ],
+            "quirks": [
+                "Limited to popular/well-indexed sites",
+                "Results based on Google's similarity algorithm",
+                "Useful for finding subsidiaries/competitors"
+            ],
+            "category": "meta"
+        },
+        {
+            "name": "before",
+            "syntax": "before:YYYY-MM-DD",
+            "description": "Pages indexed before specified date",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "before:"
+                },
+                "bing": {
+                    "supported": false,
+                    "notes": "Use UI time filters instead"
+                },
+                "duckduckgo": {
+                    "supported": false
+                }
+            },
+            "examples": [
+                {
+                    "query": "site:target.com before:2024-01-01",
+                    "description": "Indexed before 2024"
+                }
+            ],
+            "quirks": [
+                "Date format: YYYY-MM-DD",
+                "Based on index date, not publication date",
+                "Can combine with after: for range"
+            ],
+            "category": "temporal"
+        },
+        {
+            "name": "after",
+            "syntax": "after:YYYY-MM-DD",
+            "description": "Pages indexed after specified date",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "after:"
+                },
+                "bing": {
+                    "supported": false,
+                    "notes": "Use UI time filters instead"
+                },
+                "duckduckgo": {
+                    "supported": false
+                }
+            },
+            "examples": [
+                {
+                    "query": "site:target.com after:2024-06-01",
+                    "description": "Indexed after June 2024"
+                }
+            ],
+            "quirks": [
+                "Date format: YYYY-MM-DD",
+                "Useful for finding recent content",
+                "More reliable than daterange:"
+            ],
+            "category": "temporal"
+        },
+        {
+            "name": "AROUND",
+            "syntax": "term1 AROUND(n) term2",
+            "description": "Terms within n words of each other",
+            "support": {
+                "google": {
+                    "supported": true,
+                    "syntax": "AROUND(n)"
+                },
+                "bing": {
+                    "supported": true,
+                    "syntax": "NEAR:n",
+                    "notes": "Uses NEAR:n syntax"
+                },
+                "duckduckgo": {
+                    "supported": false
+                }
+            },
+            "examples": [
+                {
+                    "query": "password AROUND(3) leaked",
+                    "description": "Within 3 words"
+                },
+                {
+                    "query": "CEO AROUND(5) email",
+                    "description": "Within 5 words"
+                }
+            ],
+            "quirks": [
+                "Must be UPPERCASE",
+                "n is maximum word distance",
+                "Useful for contextual relationships",
+                "Bing equivalent: NEAR:n"
+            ],
+            "category": "proximity"
+        }
+    ],
+    "booleans": {
+        "AND": {
+            "syntax": [
+                "term1 term2",
+                "term1 AND term2"
+            ],
+            "description": "Both terms must be present (implicit default)",
+            "support": {
+                "google": {
+                    "syntax": "implicit or AND"
+                },
+                "bing": {
+                    "syntax": "implicit or AND"
+                },
+                "duckduckgo": {
+                    "syntax": "implicit"
+                }
+            }
+        },
+        "OR": {
+            "syntax": "term1 OR term2",
+            "description": "Either term can be present",
+            "support": {
+                "google": {
+                    "syntax": "OR",
+                    "notes": "Must be uppercase"
+                },
+                "bing": {
+                    "syntax": "OR"
+                },
+                "duckduckgo": {
+                    "syntax": "OR"
+                }
+            }
+        },
+        "NOT": {
+            "syntax": "-term",
+            "description": "Exclude results containing term",
+            "support": {
+                "google": {
+                    "syntax": "-"
+                },
+                "bing": {
+                    "syntax": "- or NOT"
+                },
+                "duckduckgo": {
+                    "syntax": "-"
+                }
+            }
+        },
+        "GROUP": {
+            "syntax": "(term1 OR term2) term3",
+            "description": "Parentheses for boolean grouping",
+            "support": {
+                "google": {
+                    "syntax": "()"
+                },
+                "bing": {
+                    "syntax": "()"
+                },
+                "duckduckgo": {
+                    "syntax": "()"
+                }
+            }
+        },
+        "PHRASE": {
+            "syntax": "\"exact phrase\"",
+            "description": "Matches exact phrase in order",
+            "support": {
+                "google": {
+                    "syntax": "\"\""
+                },
+                "bing": {
+                    "syntax": "\"\""
+                },
+                "duckduckgo": {
+                    "syntax": "\"\""
+                }
+            }
+        },
+        "WILDCARD": {
+            "syntax": "*",
+            "description": "Matches any word (in phrases)",
+            "support": {
+                "google": {
+                    "syntax": "*",
+                    "notes": "Works within quoted phrases"
+                },
+                "bing": {
+                    "syntax": "*"
+                },
+                "duckduckgo": {
+                    "syntax": "*"
+                }
+            }
+        }
+    },
+    "precedence": [
+        {
+            "order": 1,
+            "element": "Quoted phrases",
+            "description": "Highest priority"
+        },
+        {
+            "order": 2,
+            "element": "Parenthetical groups",
+            "description": "Boolean grouping"
+        },
+        {
+            "order": 3,
+            "element": "Exclusion (-)",
+            "description": "Negation operator"
+        },
+        {
+            "order": 4,
+            "element": "Special operators",
+            "description": "site:, filetype:, inurl:, etc."
+        },
+        {
+            "order": 5,
+            "element": "OR",
+            "description": "Boolean OR"
+        },
+        {
+            "order": 6,
+            "element": "Implicit AND",
+            "description": "Lowest priority (default)"
+        }
+    ],
+    "engineDifferences": {
+        "google": {
+            "uniqueOperators": [
+                "cache",
+                "related",
+                "before",
+                "after",
+                "AROUND"
+            ],
+            "maxWords": 32,
+            "maxChars": 2048,
+            "notes": "Most comprehensive operator support"
+        },
+        "bing": {
+            "uniqueOperators": [
+                "contains",
+                "loc",
+                "language"
+            ],
+            "equivalents": {
+                "intext": "inbody",
+                "AROUND": "NEAR"
+            },
+            "unsupported": [
+                "cache",
+                "related",
+                "before",
+                "after",
+                "allinurl",
+                "allintitle",
+                "allintext"
+            ],
+            "notes": "Different operators for some functions"
+        },
+        "duckduckgo": {
+            "uniqueOperators": [],
+            "unsupported": [
+                "cache",
+                "related",
+                "before",
+                "after",
+                "intext",
+                "AROUND",
+                "allinurl",
+                "allintitle",
+                "allintext"
+            ],
+            "notes": "Most limited operator support; privacy-focused"
+        }
+    }
+}

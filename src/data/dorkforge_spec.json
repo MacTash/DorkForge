@@ -1,0 +1,1143 @@
+{
+    "ast_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "DorkForge AST Schema v2",
+        "description": "Boolean query AST for multi-engine OSINT dork compilation",
+        "definitions": {
+            "TermNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "value"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "TERM"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    },
+                    "quoted": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "boost": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10
+                    }
+                }
+            },
+            "PhraseNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "value"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "PHRASE"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            },
+            "AndNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "children"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "AND"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "children": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/Node"
+                        }
+                    }
+                }
+            },
+            "OrNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "children"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "OR"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "children": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/Node"
+                        }
+                    }
+                }
+            },
+            "NotNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "child"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "NOT"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "child": {
+                        "$ref": "#/definitions/Node"
+                    }
+                }
+            },
+            "SiteNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "domains"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "SITE"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "domains": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1
+                    }
+                }
+            },
+            "FiletypeNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "types"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "FILETYPE"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "types": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1
+                    }
+                }
+            },
+            "InurlNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "values"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "INURL"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1
+                    },
+                    "autoQuote": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                }
+            },
+            "IntitleNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "values"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "INTITLE"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1
+                    },
+                    "autoQuote": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                }
+            },
+            "IntextNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "values"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "INTEXT"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1
+                    },
+                    "autoQuote": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                }
+            },
+            "PlatformNode": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "value"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "PLATFORM"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string",
+                        "enum": [
+                            "drive",
+                            "s3",
+                            "github",
+                            "gitlab",
+                            "pastebin",
+                            "trello",
+                            "confluence"
+                        ]
+                    }
+                }
+            },
+            "TimeframeNode": {
+                "type": "object",
+                "required": [
+                    "type"
+                ],
+                "properties": {
+                    "type": {
+                        "const": "TIMEFRAME"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "after": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    },
+                    "before": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    }
+                }
+            },
+            "Node": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/TermNode"
+                    },
+                    {
+                        "$ref": "#/definitions/PhraseNode"
+                    },
+                    {
+                        "$ref": "#/definitions/AndNode"
+                    },
+                    {
+                        "$ref": "#/definitions/OrNode"
+                    },
+                    {
+                        "$ref": "#/definitions/NotNode"
+                    },
+                    {
+                        "$ref": "#/definitions/SiteNode"
+                    },
+                    {
+                        "$ref": "#/definitions/FiletypeNode"
+                    },
+                    {
+                        "$ref": "#/definitions/InurlNode"
+                    },
+                    {
+                        "$ref": "#/definitions/IntitleNode"
+                    },
+                    {
+                        "$ref": "#/definitions/IntextNode"
+                    },
+                    {
+                        "$ref": "#/definitions/PlatformNode"
+                    },
+                    {
+                        "$ref": "#/definitions/TimeframeNode"
+                    }
+                ]
+            }
+        },
+        "type": "object",
+        "required": [
+            "type",
+            "children"
+        ],
+        "properties": {
+            "type": {
+                "const": "ROOT"
+            },
+            "id": {
+                "type": "string"
+            },
+            "children": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/Node"
+                }
+            },
+            "metadata": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "preset": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "engine_profiles": {
+        "google": {
+            "name": "Google Search",
+            "max_tokens_warn": 32,
+            "max_chars_warn": 2048,
+            "auto_quote": true,
+            "prefer_site_first": true,
+            "or_max_operands": 12,
+            "supported_operators": [
+                "site",
+                "filetype",
+                "inurl",
+                "intitle",
+                "intext",
+                "before",
+                "after",
+                "cache",
+                "related"
+            ],
+            "operator_mapping": {
+                "SITE": "site:",
+                "FILETYPE": "filetype:",
+                "INURL": "inurl:",
+                "INTITLE": "intitle:",
+                "INTEXT": "intext:",
+                "TIMEFRAME_AFTER": "after:",
+                "TIMEFRAME_BEFORE": "before:"
+            },
+            "quirks": {
+                "cache_deprecated": true,
+                "or_requires_parens": true,
+                "not_prefix": "-"
+            }
+        },
+        "bing": {
+            "name": "Bing Search",
+            "max_tokens_warn": 30,
+            "max_chars_warn": 1500,
+            "auto_quote": true,
+            "prefer_site_first": true,
+            "or_max_operands": 10,
+            "supported_operators": [
+                "site",
+                "filetype",
+                "inurl",
+                "intitle",
+                "inbody"
+            ],
+            "operator_mapping": {
+                "SITE": "site:",
+                "FILETYPE": "filetype:",
+                "INURL": "inurl:",
+                "INTITLE": "intitle:",
+                "INTEXT": "inbody:"
+            },
+            "quirks": {
+                "intext_to_inbody": true,
+                "no_temporal_operators": true,
+                "not_prefix": "-"
+            }
+        },
+        "duckduckgo": {
+            "name": "DuckDuckGo",
+            "max_tokens_warn": 25,
+            "max_chars_warn": 1000,
+            "auto_quote": true,
+            "prefer_site_first": true,
+            "or_max_operands": 8,
+            "supported_operators": [
+                "site",
+                "filetype",
+                "inurl",
+                "intitle"
+            ],
+            "operator_mapping": {
+                "SITE": "site:",
+                "FILETYPE": "filetype:",
+                "INURL": "inurl:",
+                "INTITLE": "intitle:"
+            },
+            "quirks": {
+                "no_intext": true,
+                "no_temporal_operators": true,
+                "limited_or_support": true,
+                "not_prefix": "-"
+            }
+        }
+    },
+    "lint_rules": [
+        {
+            "code": "EMPTY_QUERY",
+            "triggerDescription": "AST has no children or all children are empty",
+            "severity": "error",
+            "message": "Query is empty. Add at least one search term or operator."
+        },
+        {
+            "code": "EMPTY_OPERATOR_VALUE",
+            "triggerDescription": "Operator node has empty string or empty array value",
+            "severity": "error",
+            "message": "Operator '{operator}' has no value specified."
+        },
+        {
+            "code": "UNSUPPORTED_OPERATOR",
+            "triggerDescription": "Operator not supported by target engine",
+            "severity": "error",
+            "message": "'{operator}' is not supported by {engine}. Consider removing or using alternative."
+        },
+        {
+            "code": "OR_TRUNCATION_RISK",
+            "triggerDescription": "OR node contains more than engine.or_max_operands children",
+            "severity": "warning",
+            "message": "OR list has {count} items (max recommended: {max}). Results may be truncated or unpredictable."
+        },
+        {
+            "code": "OR_SHARDING_REQUIRED",
+            "triggerDescription": "OR node exceeds limit and sharding mode is enabled",
+            "severity": "info",
+            "message": "Query will be sharded into {shard_count} separate queries for reliability."
+        },
+        {
+            "code": "QUERY_LENGTH_LIMIT",
+            "triggerDescription": "Compiled query exceeds engine.max_tokens_warn",
+            "severity": "warning",
+            "message": "Query has {count} tokens (recommended max: {max}). Some terms may be ignored."
+        },
+        {
+            "code": "QUERY_CHAR_LIMIT",
+            "triggerDescription": "Compiled query exceeds engine.max_chars_warn",
+            "severity": "warning",
+            "message": "Query is {count} characters (recommended max: {max}). Consider splitting."
+        },
+        {
+            "code": "MISSING_SITE_SCOPE",
+            "triggerDescription": "Query contains sensitive operators (filetype:sql, inurl:admin) without site: restriction",
+            "severity": "info",
+            "message": "No site: scope defined. Results will be global. Consider adding target domain."
+        },
+        {
+            "code": "DUPLICATE_OPERATOR",
+            "triggerDescription": "Same operator type appears multiple times at root level",
+            "severity": "info",
+            "message": "Multiple '{operator}' operators detected. Consider consolidating."
+        },
+        {
+            "code": "CONFLICTING_TIMEFRAME",
+            "triggerDescription": "TIMEFRAME node has after date >= before date",
+            "severity": "error",
+            "message": "Invalid timeframe: 'after' date must be before 'before' date."
+        },
+        {
+            "code": "INVALID_DATE_FORMAT",
+            "triggerDescription": "TIMEFRAME date does not match YYYY-MM-DD format",
+            "severity": "error",
+            "message": "Invalid date format. Use YYYY-MM-DD (e.g., 2024-01-15)."
+        },
+        {
+            "code": "SENSITIVE_QUERY_PATTERN",
+            "triggerDescription": "Query matches credential/PII discovery patterns",
+            "severity": "warning",
+            "message": "Query targets sensitive data ({pattern}). Ensure authorized use only."
+        },
+        {
+            "code": "AUTO_QUOTE_APPLIED",
+            "triggerDescription": "Multi-word value auto-quoted by renderer",
+            "severity": "info",
+            "message": "Value '{value}' auto-quoted for exact match."
+        },
+        {
+            "code": "PLATFORM_EXPANDED",
+            "triggerDescription": "PLATFORM node expanded to site: operator",
+            "severity": "info",
+            "message": "Platform '{platform}' expanded to site:{domain}."
+        },
+        {
+            "code": "NESTED_NOT_WARNING",
+            "triggerDescription": "NOT node contains another NOT node (double negative)",
+            "severity": "warning",
+            "message": "Double negation detected. This may not work as expected."
+        }
+    ],
+    "presets": [
+        {
+            "id": "drive_exposure",
+            "name": "Google Drive Exposure",
+            "description": "Find publicly shared Google Drive documents, spreadsheets, and folders",
+            "category": "cloud_exposure",
+            "riskLevel": "medium",
+            "defaultAST": {
+                "type": "ROOT",
+                "children": [
+                    {
+                        "type": "PLATFORM",
+                        "value": "drive"
+                    },
+                    {
+                        "type": "OR",
+                        "children": [
+                            {
+                                "type": "INURL",
+                                "values": [
+                                    "/file/d/",
+                                    "/folders/",
+                                    "/spreadsheets/d/"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "exampleInputs": {
+                "searchTerms": [
+                    "confidential",
+                    "budget 2024",
+                    "employee list"
+                ]
+            },
+            "exampleRenderedQuery": "site:drive.google.com (inurl:\"/file/d/\" OR inurl:\"/folders/\" OR inurl:\"/spreadsheets/d/\") \"confidential\""
+        },
+        {
+            "id": "s3_buckets",
+            "name": "AWS S3 Bucket Discovery",
+            "description": "Identify exposed S3 buckets and their contents",
+            "category": "cloud_exposure",
+            "riskLevel": "high",
+            "defaultAST": {
+                "type": "ROOT",
+                "children": [
+                    {
+                        "type": "SITE",
+                        "domains": [
+                            "s3.amazonaws.com",
+                            "s3-*.amazonaws.com"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "children": [
+                            {
+                                "type": "INTITLE",
+                                "values": [
+                                    "index of",
+                                    "bucket"
+                                ]
+                            },
+                            {
+                                "type": "INURL",
+                                "values": [
+                                    ".xml",
+                                    "ListBucketResult"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "exampleInputs": {
+                "searchTerms": [
+                    "backup",
+                    "database",
+                    "prod"
+                ]
+            },
+            "exampleRenderedQuery": "(site:s3.amazonaws.com OR site:s3-*.amazonaws.com) (intitle:\"index of\" OR intitle:\"bucket\" OR inurl:\".xml\" OR inurl:\"ListBucketResult\")"
+        },
+        {
+            "id": "network_cameras",
+            "name": "Network Camera Interfaces",
+            "description": "Discover exposed IP camera web interfaces",
+            "category": "iot_exposure",
+            "riskLevel": "medium",
+            "defaultAST": {
+                "type": "ROOT",
+                "children": [
+                    {
+                        "type": "OR",
+                        "children": [
+                            {
+                                "type": "INTITLE",
+                                "values": [
+                                    "webcamXP",
+                                    "IP Camera",
+                                    "Network Camera",
+                                    "Live View",
+                                    "AXIS"
+                                ]
+                            },
+                            {
+                                "type": "INURL",
+                                "values": [
+                                    "view.shtml",
+                                    "ViewerFrame",
+                                    "axis-cgi",
+                                    "mjpg/video.mjpg"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "exampleInputs": {
+                "location": "parking",
+                "excludeSites": [
+                    "youtube.com",
+                    "amazon.com"
+                ]
+            },
+            "exampleRenderedQuery": "(intitle:\"webcamXP\" OR intitle:\"IP Camera\" OR intitle:\"Network Camera\" OR inurl:\"view.shtml\" OR inurl:\"ViewerFrame\") -site:youtube.com -site:amazon.com"
+        },
+        {
+            "id": "open_indexes",
+            "name": "Open Directory Indexes",
+            "description": "Find web servers with directory listing enabled",
+            "category": "misconfiguration",
+            "riskLevel": "low",
+            "defaultAST": {
+                "type": "ROOT",
+                "children": [
+                    {
+                        "type": "INTITLE",
+                        "values": [
+                            "index of"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "children": [
+                            {
+                                "type": "PHRASE",
+                                "value": "parent directory"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": "last modified"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": "size"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "exampleInputs": {
+                "filetypes": [
+                    "mp3",
+                    "mp4",
+                    "pdf"
+                ],
+                "targetDomain": "edu"
+            },
+            "exampleRenderedQuery": "intitle:\"index of\" (\"parent directory\" OR \"last modified\" OR \"size\") site:*.edu"
+        },
+        {
+            "id": "config_files",
+            "name": "Configuration File Exposure",
+            "description": "Locate exposed configuration files that may contain sensitive settings",
+            "category": "sensitive_files",
+            "riskLevel": "critical",
+            "defaultAST": {
+                "type": "ROOT",
+                "children": [
+                    {
+                        "type": "FILETYPE",
+                        "types": [
+                            "env",
+                            "yml",
+                            "yaml",
+                            "conf",
+                            "cfg",
+                            "ini"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "children": [
+                            {
+                                "type": "INURL",
+                                "values": [
+                                    ".env",
+                                    "config",
+                                    "settings"
+                                ]
+                            },
+                            {
+                                "type": "INTEXT",
+                                "values": [
+                                    "DB_PASSWORD",
+                                    "API_KEY",
+                                    "SECRET"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "exampleInputs": {
+                "targetDomain": "example.com"
+            },
+            "exampleRenderedQuery": "site:example.com (filetype:env OR filetype:yml OR filetype:yaml OR filetype:conf) (inurl:\".env\" OR inurl:\"config\" OR intext:\"DB_PASSWORD\" OR intext:\"API_KEY\")"
+        },
+        {
+            "id": "credential_exposure",
+            "name": "Credential Leakage Discovery",
+            "description": "Find exposed password files, credential dumps, and authentication configs (authorized testing only)",
+            "category": "credentials",
+            "riskLevel": "critical",
+            "defaultAST": {
+                "type": "ROOT",
+                "children": [
+                    {
+                        "type": "FILETYPE",
+                        "types": [
+                            "txt",
+                            "log",
+                            "sql",
+                            "csv"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "children": [
+                            {
+                                "type": "INTEXT",
+                                "values": [
+                                    "password",
+                                    "passwd",
+                                    "pwd"
+                                ]
+                            },
+                            {
+                                "type": "INTITLE",
+                                "values": [
+                                    "password",
+                                    "credentials"
+                                ]
+                            },
+                            {
+                                "type": "INURL",
+                                "values": [
+                                    "passwords",
+                                    "credentials",
+                                    "auth"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "exampleInputs": {
+                "targetDomain": "example.com"
+            },
+            "exampleRenderedQuery": "site:example.com (filetype:txt OR filetype:log OR filetype:sql) (intext:\"password\" OR intext:\"passwd\" OR intitle:\"password\" OR inurl:\"passwords\")"
+        },
+        {
+            "id": "backup_files",
+            "name": "Backup File Discovery",
+            "description": "Locate exposed backup files and database dumps",
+            "category": "sensitive_files",
+            "riskLevel": "high",
+            "defaultAST": {
+                "type": "ROOT",
+                "children": [
+                    {
+                        "type": "FILETYPE",
+                        "types": [
+                            "sql",
+                            "bak",
+                            "backup",
+                            "dump",
+                            "tar.gz",
+                            "zip"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "children": [
+                            {
+                                "type": "INTITLE",
+                                "values": [
+                                    "index of",
+                                    "backup"
+                                ]
+                            },
+                            {
+                                "type": "INURL",
+                                "values": [
+                                    "backup",
+                                    "dump",
+                                    "db_backup",
+                                    "export"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "exampleInputs": {
+                "targetDomain": "example.com",
+                "timeframe": {
+                    "after": "2024-01-01"
+                }
+            },
+            "exampleRenderedQuery": "site:example.com (filetype:sql OR filetype:bak OR filetype:backup OR filetype:tar.gz) (intitle:\"index of\" OR inurl:\"backup\" OR inurl:\"dump\") after:2024-01-01"
+        },
+        {
+            "id": "personnel_osint",
+            "name": "Personnel Intelligence",
+            "description": "Gather information about organization personnel from professional networks",
+            "category": "personnel",
+            "riskLevel": "low",
+            "defaultAST": {
+                "type": "ROOT",
+                "children": [
+                    {
+                        "type": "SITE",
+                        "domains": [
+                            "linkedin.com/in",
+                            "github.com",
+                            "twitter.com"
+                        ]
+                    },
+                    {
+                        "type": "OR",
+                        "children": [
+                            {
+                                "type": "PHRASE",
+                                "value": "software engineer"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": "security"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": "devops"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "exampleInputs": {
+                "organization": "Example Corp",
+                "role": "CISO"
+            },
+            "exampleRenderedQuery": "(site:linkedin.com/in OR site:github.com) \"Example Corp\" (\"CISO\" OR \"security\" OR \"information security\")"
+        }
+    ],
+    "unit_tests": {
+        "renderer_tests": [
+            {
+                "name": "Canonical ordering test",
+                "description": "Verify SITE → FILETYPE → STRUCTURAL → PHRASE → NOT ordering",
+                "input_ast": {
+                    "type": "ROOT",
+                    "children": [
+                        {
+                            "type": "PHRASE",
+                            "value": "secret document"
+                        },
+                        {
+                            "type": "INURL",
+                            "values": [
+                                "admin"
+                            ]
+                        },
+                        {
+                            "type": "FILETYPE",
+                            "types": [
+                                "pdf"
+                            ]
+                        },
+                        {
+                            "type": "SITE",
+                            "domains": [
+                                "example.com"
+                            ]
+                        },
+                        {
+                            "type": "NOT",
+                            "child": {
+                                "type": "SITE",
+                                "domains": [
+                                    "blog.example.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "expected_output": {
+                    "google": "site:example.com filetype:pdf inurl:admin \"secret document\" -site:blog.example.com",
+                    "bing": "site:example.com filetype:pdf inurl:admin \"secret document\" -site:blog.example.com",
+                    "duckduckgo": "site:example.com filetype:pdf inurl:admin \"secret document\" -site:blog.example.com"
+                }
+            },
+            {
+                "name": "Auto-quote multi-word values",
+                "description": "Verify multi-word INURL/INTITLE values are auto-quoted",
+                "input_ast": {
+                    "type": "ROOT",
+                    "children": [
+                        {
+                            "type": "INURL",
+                            "values": [
+                                "admin panel",
+                                "login"
+                            ]
+                        },
+                        {
+                            "type": "INTITLE",
+                            "values": [
+                                "index of",
+                                "test"
+                            ]
+                        }
+                    ]
+                },
+                "expected_output": {
+                    "google": "inurl:\"admin panel\" inurl:login intitle:\"index of\" intitle:test"
+                }
+            },
+            {
+                "name": "OR list with site sharding",
+                "description": "Verify OR list >12 items produces sharded queries",
+                "input_ast": {
+                    "type": "ROOT",
+                    "children": [
+                        {
+                            "type": "SITE",
+                            "domains": [
+                                "a.com",
+                                "b.com",
+                                "c.com",
+                                "d.com",
+                                "e.com",
+                                "f.com",
+                                "g.com",
+                                "h.com",
+                                "i.com",
+                                "j.com",
+                                "k.com",
+                                "l.com",
+                                "m.com",
+                                "n.com"
+                            ]
+                        }
+                    ]
+                },
+                "expected_output": {
+                    "sharded": true,
+                    "shard_count": 2,
+                    "queries": [
+                        "(site:a.com OR site:b.com OR site:c.com OR site:d.com OR site:e.com OR site:f.com OR site:g.com OR site:h.com OR site:i.com OR site:j.com OR site:k.com OR site:l.com)",
+                        "(site:m.com OR site:n.com)"
+                    ]
+                }
+            }
+        ],
+        "linter_tests": [
+            {
+                "name": "Empty query detection",
+                "description": "Verify EMPTY_QUERY error for empty AST",
+                "input_ast": {
+                    "type": "ROOT",
+                    "children": []
+                },
+                "expected_lint": [
+                    {
+                        "code": "EMPTY_QUERY",
+                        "severity": "error"
+                    }
+                ]
+            },
+            {
+                "name": "OR truncation warning",
+                "description": "Verify OR_TRUNCATION_RISK for >12 operands",
+                "input_ast": {
+                    "type": "ROOT",
+                    "children": [
+                        {
+                            "type": "OR",
+                            "children": [
+                                {
+                                    "type": "TERM",
+                                    "value": "a"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "b"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "c"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "d"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "e"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "f"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "g"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "h"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "i"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "j"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "k"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "l"
+                                },
+                                {
+                                    "type": "TERM",
+                                    "value": "m"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "expected_lint": [
+                    {
+                        "code": "OR_TRUNCATION_RISK",
+                        "severity": "warning",
+                        "count": 13
+                    }
+                ]
+            },
+            {
+                "name": "Sensitive query pattern detection",
+                "description": "Verify SENSITIVE_QUERY_PATTERN warning for credential searches",
+                "input_ast": {
+                    "type": "ROOT",
+                    "children": [
+                        {
+                            "type": "FILETYPE",
+                            "types": [
+                                "sql"
+                            ]
+                        },
+                        {
+                            "type": "INTEXT",
+                            "values": [
+                                "password"
+                            ]
+                        }
+                    ]
+                },
+                "expected_lint": [
+                    {
+                        "code": "SENSITIVE_QUERY_PATTERN",
+                        "severity": "warning",
+                        "pattern": "credential_discovery"
+                    },
+                    {
+                        "code": "MISSING_SITE_SCOPE",
+                        "severity": "info"
+                    }
+                ]
+            }
+        ]
+    },
+    "notes": {
+        "canonical_ordering_rationale": "SITE first narrows search space immediately (most impactful). FILETYPE next reduces by document type. STRUCTURAL operators (INURL/INTITLE/INTEXT) filter within content. PHRASE/TERM are search keywords. NOT exclusions applied last to remove unwanted results from the filtered set.",
+        "or_sharding_behavior": "When OR operand count exceeds engine.or_max_operands, renderer can: (a) produce multiple sharded queries with batch_size=12, or (b) emit OR_TRUNCATION_RISK warning and proceed. Mode is configurable via render options.",
+        "auto_quote_rules": "Multi-word values (containing spaces) are automatically double-quoted. Single words are never quoted. Phrases (PHRASE nodes) are always quoted.",
+        "platform_expansion": "PLATFORM nodes expand to predefined site: operators. drive→drive.google.com, s3→s3.amazonaws.com, github→github.com, etc."
+    }
+}

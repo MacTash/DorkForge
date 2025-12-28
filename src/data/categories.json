@@ -1,0 +1,2056 @@
+{
+    "version": "2025.1",
+    "lastUpdated": "2025-12-27",
+    "source": "GHDB + OSINT Playbooks",
+    "categories": [
+        {
+            "id": "credential_leakage",
+            "name": "Credential Leakage",
+            "description": "Exposed credentials, API keys, secrets, and authentication tokens",
+            "riskLevel": "critical",
+            "ghdbCategories": [
+                "Files Containing Passwords",
+                "Files Containing Usernames"
+            ],
+            "patterns": [
+                {
+                    "id": "env_files",
+                    "name": "Environment Files",
+                    "intent": "Discover exposed .env files with database credentials and API keys",
+                    "operators": [
+                        "filetype",
+                        "inurl",
+                        "site"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "env"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "TERM",
+                                        "value": "DB_PASSWORD"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "API_KEY"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "SECRET_KEY"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:env (DB_PASSWORD OR API_KEY OR SECRET_KEY)",
+                        "bing": "filetype:env (DB_PASSWORD OR API_KEY OR SECRET_KEY)",
+                        "duckduckgo": "filetype:env DB_PASSWORD"
+                    },
+                    "legalBoundary": "View only publicly indexed content. Do not use discovered credentials.",
+                    "tags": [
+                        "secrets",
+                        "config",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "private_keys",
+                    "name": "Private Keys",
+                    "intent": "Find exposed SSH/TLS private keys in public repositories or web servers",
+                    "operators": [
+                        "filetype",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "BEGIN RSA PRIVATE KEY"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "BEGIN OPENSSH PRIVATE KEY"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "BEGIN EC PRIVATE KEY"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "\"BEGIN RSA PRIVATE KEY\" OR \"BEGIN OPENSSH PRIVATE KEY\" OR \"BEGIN EC PRIVATE KEY\"",
+                        "bing": "\"BEGIN RSA PRIVATE KEY\" OR \"BEGIN OPENSSH PRIVATE KEY\"",
+                        "duckduckgo": "\"BEGIN RSA PRIVATE KEY\""
+                    },
+                    "legalBoundary": "Report exposed keys via responsible disclosure. Never use for authentication.",
+                    "tags": [
+                        "ssh",
+                        "tls",
+                        "cryptographic"
+                    ]
+                },
+                {
+                    "id": "sql_dumps",
+                    "name": "SQL Database Dumps",
+                    "intent": "Locate database exports containing user tables with credentials",
+                    "operators": [
+                        "filetype",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "sql"
+                            },
+                            {
+                                "type": "AND",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "INSERT INTO"
+                                    },
+                                    {
+                                        "type": "OR",
+                                        "children": [
+                                            {
+                                                "type": "TERM",
+                                                "value": "password"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "value": "passwd"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "value": "pwd"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:sql \"INSERT INTO\" (password OR passwd OR pwd)",
+                        "bing": "filetype:sql \"INSERT INTO\" password",
+                        "duckduckgo": "filetype:sql password"
+                    },
+                    "legalBoundary": "Never download or access exposed databases. Report to affected organization.",
+                    "tags": [
+                        "database",
+                        "mysql",
+                        "postgres"
+                    ]
+                },
+                {
+                    "id": "aws_credentials",
+                    "name": "AWS Credentials",
+                    "intent": "Find exposed AWS access keys and secret tokens",
+                    "operators": [
+                        "filetype",
+                        "inurl",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "inurl",
+                                                "value": ".aws/credentials"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "filetype",
+                                                "value": "json"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "value": "aws_access_key_id"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "inurl:.aws/credentials OR (filetype:json aws_access_key_id)",
+                        "bing": "inurl:.aws/credentials",
+                        "duckduckgo": "inurl:.aws/credentials"
+                    },
+                    "legalBoundary": "AWS credential abuse is a federal crime. Report via AWS abuse form.",
+                    "tags": [
+                        "cloud",
+                        "aws",
+                        "iam"
+                    ]
+                },
+                {
+                    "id": "git_credentials",
+                    "name": "Git Credential Files",
+                    "intent": "Find exposed .git-credentials or credential helpers",
+                    "operators": [
+                        "filetype",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "filetype",
+                                        "value": "git-credentials"
+                                    },
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "inurl",
+                                                "value": ".git/config"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "value": "credential"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:git-credentials OR (inurl:.git/config credential)",
+                        "bing": "inurl:.git/config credential",
+                        "duckduckgo": "inurl:.git/config"
+                    },
+                    "legalBoundary": "Exposed git credentials enable repository compromise. Report to maintainers.",
+                    "tags": [
+                        "git",
+                        "vcs",
+                        "repository"
+                    ]
+                },
+                {
+                    "id": "log_credentials",
+                    "name": "Credentials in Logs",
+                    "intent": "Find accidentally logged passwords in debug/application logs",
+                    "operators": [
+                        "filetype",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "log"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "password="
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "passwd="
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "api_key="
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "token="
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:log (\"password=\" OR \"passwd=\" OR \"api_key=\" OR \"token=\")",
+                        "bing": "filetype:log \"password=\"",
+                        "duckduckgo": "filetype:log password"
+                    },
+                    "legalBoundary": "Log files may contain PII. Handle with appropriate data protection.",
+                    "tags": [
+                        "logs",
+                        "debug",
+                        "application"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "open_directories",
+            "name": "Open Directories",
+            "description": "Exposed directory listings revealing file structures and sensitive content",
+            "riskLevel": "high",
+            "ghdbCategories": [
+                "Files Containing Juicy Info",
+                "Sensitive Directories"
+            ],
+            "patterns": [
+                {
+                    "id": "index_of_parent",
+                    "name": "Apache/Nginx Directory Listings",
+                    "intent": "Find default directory listings exposing file structures",
+                    "operators": [
+                        "intitle",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "intitle",
+                                "value": "index of"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": "parent directory"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:\"index of\" \"parent directory\"",
+                        "bing": "intitle:\"index of\" \"parent directory\"",
+                        "duckduckgo": "intitle:\"index of\""
+                    },
+                    "legalBoundary": "Viewing open directories is generally permitted. Downloading protected content is not.",
+                    "tags": [
+                        "apache",
+                        "nginx",
+                        "listing"
+                    ]
+                },
+                {
+                    "id": "backup_directories",
+                    "name": "Backup Directories",
+                    "intent": "Find exposed backup folders with sensitive archives",
+                    "operators": [
+                        "intitle",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "intitle",
+                                "value": "index of"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "TERM",
+                                        "value": "backup"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "backups"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "bak"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:\"index of\" (backup OR backups OR bak)",
+                        "bing": "intitle:\"index of\" backup",
+                        "duckduckgo": "intitle:\"index of\" backup"
+                    },
+                    "legalBoundary": "Backup files often contain complete database dumps. Access may violate CFAA.",
+                    "tags": [
+                        "backup",
+                        "archive",
+                        "sensitive"
+                    ]
+                },
+                {
+                    "id": "git_directories",
+                    "name": "Exposed .git Directories",
+                    "intent": "Find publicly accessible .git folders enabling source code recovery",
+                    "operators": [
+                        "intitle",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "intitle",
+                                "value": "index of"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": ".git"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:\"index of\" \".git\"",
+                        "bing": "intitle:\"index of\" \".git\"",
+                        "duckduckgo": "intitle:\"index of\" .git"
+                    },
+                    "legalBoundary": "Exposed .git enables full repo reconstruction. May contain secrets in history.",
+                    "tags": [
+                        "git",
+                        "vcs",
+                        "source"
+                    ]
+                },
+                {
+                    "id": "upload_directories",
+                    "name": "Upload Directories",
+                    "intent": "Find exposed upload folders potentially containing user-submitted content",
+                    "operators": [
+                        "intitle",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "intitle",
+                                "value": "index of"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/uploads/"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/upload/"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/files/"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:\"index of\" (inurl:/uploads/ OR inurl:/upload/ OR inurl:/files/)",
+                        "bing": "intitle:\"index of\" inurl:/uploads/",
+                        "duckduckgo": "intitle:\"index of\" uploads"
+                    },
+                    "legalBoundary": "Upload directories may contain private user data. PII protection laws apply.",
+                    "tags": [
+                        "uploads",
+                        "userdata",
+                        "cms"
+                    ]
+                },
+                {
+                    "id": "wordpress_content",
+                    "name": "WordPress Content Directories",
+                    "intent": "Find exposed wp-content directories with plugins, themes, and uploads",
+                    "operators": [
+                        "intitle",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "intitle",
+                                "value": "index of"
+                            },
+                            {
+                                "type": "OPERATOR",
+                                "operator": "inurl",
+                                "value": "/wp-content/"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:\"index of\" inurl:/wp-content/",
+                        "bing": "intitle:\"index of\" inurl:/wp-content/",
+                        "duckduckgo": "intitle:\"index of\" wp-content"
+                    },
+                    "legalBoundary": "WordPress content may reveal vulnerable plugins. Exploitation without consent is illegal.",
+                    "tags": [
+                        "wordpress",
+                        "cms",
+                        "plugins"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "configuration_files",
+            "name": "Configuration Files",
+            "description": "Exposed web server, application, and infrastructure configuration files",
+            "riskLevel": "critical",
+            "ghdbCategories": [
+                "Web Server Detection",
+                "Sensitive Directories"
+            ],
+            "patterns": [
+                {
+                    "id": "web_config",
+                    "name": "ASP.NET web.config",
+                    "intent": "Find exposed IIS/ASP.NET configuration files with connection strings",
+                    "operators": [
+                        "filetype",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "xml"
+                            },
+                            {
+                                "type": "OPERATOR",
+                                "operator": "inurl",
+                                "value": "web.config"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:xml inurl:web.config",
+                        "bing": "filetype:xml inurl:web.config",
+                        "duckduckgo": "filetype:xml web.config"
+                    },
+                    "legalBoundary": "web.config files contain database credentials and encryption keys.",
+                    "tags": [
+                        "iis",
+                        "aspnet",
+                        "dotnet"
+                    ]
+                },
+                {
+                    "id": "nginx_conf",
+                    "name": "Nginx Configuration",
+                    "intent": "Find exposed nginx.conf revealing server architecture",
+                    "operators": [
+                        "filetype",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "conf"
+                            },
+                            {
+                                "type": "OPERATOR",
+                                "operator": "inurl",
+                                "value": "nginx.conf"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:conf inurl:nginx.conf",
+                        "bing": "filetype:conf inurl:nginx.conf",
+                        "duckduckgo": "filetype:conf nginx"
+                    },
+                    "legalBoundary": "Server configs reveal internal paths, upstream servers, and security settings.",
+                    "tags": [
+                        "nginx",
+                        "webserver",
+                        "proxy"
+                    ]
+                },
+                {
+                    "id": "php_ini",
+                    "name": "PHP Configuration",
+                    "intent": "Find exposed php.ini files revealing PHP security settings",
+                    "operators": [
+                        "filetype",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "ini"
+                            },
+                            {
+                                "type": "OPERATOR",
+                                "operator": "inurl",
+                                "value": "php.ini"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:ini inurl:php.ini",
+                        "bing": "filetype:ini inurl:php.ini",
+                        "duckduckgo": "filetype:ini php.ini"
+                    },
+                    "legalBoundary": "PHP configs reveal security configurations and potential weaknesses.",
+                    "tags": [
+                        "php",
+                        "webserver",
+                        "security"
+                    ]
+                },
+                {
+                    "id": "docker_compose",
+                    "name": "Docker Compose Files",
+                    "intent": "Find exposed docker-compose.yml with service configurations",
+                    "operators": [
+                        "filetype",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "filetype",
+                                                "value": "yml"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "value": "docker-compose"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "filetype",
+                                                "value": "yaml"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "value": "docker-compose"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "(filetype:yml OR filetype:yaml) docker-compose",
+                        "bing": "filetype:yml docker-compose",
+                        "duckduckgo": "filetype:yml docker-compose"
+                    },
+                    "legalBoundary": "Docker configs expose service architecture, ports, and environment variables.",
+                    "tags": [
+                        "docker",
+                        "containers",
+                        "devops"
+                    ]
+                },
+                {
+                    "id": "kubernetes_config",
+                    "name": "Kubernetes Configs",
+                    "intent": "Find exposed kubeconfig files with cluster credentials",
+                    "operators": [
+                        "inurl",
+                        "filetype"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": ".kube/config"
+                                    },
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "filetype",
+                                                "value": "yaml"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "value": "apiVersion"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "value": "clusters"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "inurl:.kube/config OR (filetype:yaml apiVersion clusters)",
+                        "bing": "inurl:.kube/config",
+                        "duckduckgo": "inurl:.kube/config"
+                    },
+                    "legalBoundary": "Kubeconfig provides full cluster access. Extremely high risk.",
+                    "tags": [
+                        "kubernetes",
+                        "k8s",
+                        "cloud"
+                    ]
+                },
+                {
+                    "id": "terraform_state",
+                    "name": "Terraform State Files",
+                    "intent": "Find exposed terraform.tfstate with infrastructure secrets",
+                    "operators": [
+                        "filetype",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "filetype",
+                                        "value": "tfstate"
+                                    },
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "inurl",
+                                                "value": "terraform.tfstate"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:tfstate OR inurl:terraform.tfstate",
+                        "bing": "inurl:terraform.tfstate",
+                        "duckduckgo": "terraform.tfstate"
+                    },
+                    "legalBoundary": "Terraform state contains all resource configurations and secrets in plaintext.",
+                    "tags": [
+                        "terraform",
+                        "iac",
+                        "cloud"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "backup_artifacts",
+            "name": "Backup Artifacts",
+            "description": "Database dumps, archive files, and backup artifacts",
+            "riskLevel": "critical",
+            "ghdbCategories": [
+                "Files Containing Juicy Info"
+            ],
+            "patterns": [
+                {
+                    "id": "sql_backups",
+                    "name": "SQL Backup Files",
+                    "intent": "Find database backup files with complete data exports",
+                    "operators": [
+                        "filetype",
+                        "intitle"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "sql"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "mysqldump"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "CREATE TABLE"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "pg_dump"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:sql (\"mysqldump\" OR \"CREATE TABLE\" OR \"pg_dump\")",
+                        "bing": "filetype:sql mysqldump",
+                        "duckduckgo": "filetype:sql mysqldump"
+                    },
+                    "legalBoundary": "Database backups contain complete user data. Access is typically unauthorized.",
+                    "tags": [
+                        "database",
+                        "mysql",
+                        "postgres"
+                    ]
+                },
+                {
+                    "id": "archive_backups",
+                    "name": "Archive Backup Files",
+                    "intent": "Find compressed backup archives in open directories",
+                    "operators": [
+                        "intitle",
+                        "filetype"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "intitle",
+                                "value": "index of"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": ".tar.gz"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": ".zip"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": ".rar"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "backup"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:\"index of\" (\".tar.gz\" OR \".zip\" OR \".rar\" OR backup)",
+                        "bing": "intitle:\"index of\" backup .zip",
+                        "duckduckgo": "intitle:\"index of\" backup"
+                    },
+                    "legalBoundary": "Backup archives may contain complete site/database snapshots.",
+                    "tags": [
+                        "archive",
+                        "compressed",
+                        "backup"
+                    ]
+                },
+                {
+                    "id": "bak_files",
+                    "name": ".bak Configuration Backups",
+                    "intent": "Find backup copies of configuration files",
+                    "operators": [
+                        "filetype",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "bak"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "TERM",
+                                        "value": "config"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "password"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "database"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:bak (config OR password OR database)",
+                        "bing": "filetype:bak config",
+                        "duckduckgo": "filetype:bak config"
+                    },
+                    "legalBoundary": "Backup files often retain credentials from original configs.",
+                    "tags": [
+                        "backup",
+                        "config",
+                        "legacy"
+                    ]
+                },
+                {
+                    "id": "old_files",
+                    "name": ".old Legacy Files",
+                    "intent": "Find old versions of files with potentially sensitive content",
+                    "operators": [
+                        "filetype",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "old"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "wp-config"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "config"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "settings"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:old (inurl:wp-config OR inurl:config OR inurl:settings)",
+                        "bing": "filetype:old inurl:config",
+                        "duckduckgo": "filetype:old config"
+                    },
+                    "legalBoundary": "Legacy files may have weaker security than current versions.",
+                    "tags": [
+                        "legacy",
+                        "old",
+                        "deprecated"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "login_panels",
+            "name": "Login Panels & Admin Interfaces",
+            "description": "Administrative interfaces, login pages, and management consoles",
+            "riskLevel": "high",
+            "ghdbCategories": [
+                "Pages Containing Login Portals"
+            ],
+            "patterns": [
+                {
+                    "id": "admin_login",
+                    "name": "Generic Admin Panels",
+                    "intent": "Find administrative login pages for potential credential attacks",
+                    "operators": [
+                        "intitle",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "intitle",
+                                "value": "admin"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/admin/"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/login"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/signin"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:admin (inurl:/admin/ OR inurl:/login OR inurl:/signin)",
+                        "bing": "intitle:admin inurl:/admin/",
+                        "duckduckgo": "intitle:admin inurl:admin"
+                    },
+                    "legalBoundary": "Do not attempt authentication without authorization. Discovery only.",
+                    "tags": [
+                        "admin",
+                        "login",
+                        "authentication"
+                    ]
+                },
+                {
+                    "id": "phpmyadmin",
+                    "name": "phpMyAdmin Interfaces",
+                    "intent": "Find exposed database management interfaces",
+                    "operators": [
+                        "inurl",
+                        "intitle"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "phpmyadmin"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "phpMyAdmin"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "inurl:phpmyadmin OR intitle:phpMyAdmin",
+                        "bing": "inurl:phpmyadmin",
+                        "duckduckgo": "inurl:phpmyadmin"
+                    },
+                    "legalBoundary": "phpMyAdmin provides direct database access. High-value target for attackers.",
+                    "tags": [
+                        "database",
+                        "mysql",
+                        "management"
+                    ]
+                },
+                {
+                    "id": "cms_admin",
+                    "name": "CMS Admin Panels",
+                    "intent": "Find content management system administrative interfaces",
+                    "operators": [
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/wp-admin/"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/administrator/"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/admin/dashboard"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "inurl:/wp-admin/ OR inurl:/administrator/ OR inurl:/admin/dashboard",
+                        "bing": "inurl:/wp-admin/",
+                        "duckduckgo": "inurl:wp-admin"
+                    },
+                    "legalBoundary": "CMS panels are common attack vectors. Credential stuffing is illegal.",
+                    "tags": [
+                        "wordpress",
+                        "joomla",
+                        "cms"
+                    ]
+                },
+                {
+                    "id": "network_devices",
+                    "name": "Network Device Consoles",
+                    "intent": "Find exposed router, firewall, and network device management interfaces",
+                    "operators": [
+                        "intitle",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "RouterOS"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "pfSense"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "FortiGate"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/webvpn/"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:RouterOS OR intitle:pfSense OR intitle:FortiGate OR inurl:/webvpn/",
+                        "bing": "intitle:pfSense",
+                        "duckduckgo": "intitle:pfSense"
+                    },
+                    "legalBoundary": "Network devices control infrastructure. Unauthorized access is critical infrastructure attack.",
+                    "tags": [
+                        "network",
+                        "router",
+                        "firewall"
+                    ]
+                },
+                {
+                    "id": "monitoring_dashboards",
+                    "name": "Monitoring Dashboards",
+                    "intent": "Find exposed Grafana, Kibana, and monitoring interfaces",
+                    "operators": [
+                        "intitle",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "intitle",
+                                                "value": "Grafana"
+                                            },
+                                            {
+                                                "type": "TERM",
+                                                "value": "login"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "intitle",
+                                                "value": "Kibana"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/prometheus/"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "(intitle:Grafana login) OR intitle:Kibana OR inurl:/prometheus/",
+                        "bing": "intitle:Grafana login",
+                        "duckduckgo": "intitle:Grafana"
+                    },
+                    "legalBoundary": "Monitoring dashboards reveal infrastructure metrics and potential vulnerabilities.",
+                    "tags": [
+                        "monitoring",
+                        "grafana",
+                        "kibana"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "document_exposure",
+            "name": "Public Document Exposure",
+            "description": "Sensitive documents, reports, and files indexed by search engines",
+            "riskLevel": "high",
+            "ghdbCategories": [
+                "Sensitive Directories",
+                "Files Containing Juicy Info"
+            ],
+            "patterns": [
+                {
+                    "id": "confidential_pdfs",
+                    "name": "Confidential PDF Documents",
+                    "intent": "Find PDF documents marked as confidential or internal",
+                    "operators": [
+                        "filetype",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "pdf"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "confidential"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "internal only"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "not for distribution"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:pdf (\"confidential\" OR \"internal only\" OR \"not for distribution\")",
+                        "bing": "filetype:pdf confidential",
+                        "duckduckgo": "filetype:pdf confidential"
+                    },
+                    "legalBoundary": "Documents marked confidential have an expectation of privacy. Access may be restricted.",
+                    "tags": [
+                        "pdf",
+                        "confidential",
+                        "documents"
+                    ]
+                },
+                {
+                    "id": "financial_docs",
+                    "name": "Financial Documents",
+                    "intent": "Find financial reports, budgets, and accounting documents",
+                    "operators": [
+                        "filetype",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "filetype",
+                                        "value": "xlsx"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "filetype",
+                                        "value": "xls"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "TERM",
+                                        "value": "budget"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "salary"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "revenue"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "financial"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "(filetype:xlsx OR filetype:xls) (budget OR salary OR revenue OR financial)",
+                        "bing": "filetype:xlsx budget",
+                        "duckduckgo": "filetype:xlsx budget"
+                    },
+                    "legalBoundary": "Financial documents may contain material non-public information. Securities laws apply.",
+                    "tags": [
+                        "financial",
+                        "excel",
+                        "accounting"
+                    ]
+                },
+                {
+                    "id": "hr_documents",
+                    "name": "HR & Personnel Documents",
+                    "intent": "Find HR documents, employee records, and personnel files",
+                    "operators": [
+                        "filetype",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "filetype",
+                                        "value": "pdf"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "filetype",
+                                        "value": "docx"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "employee handbook"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "personnel file"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "ssn"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "performance review"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "(filetype:pdf OR filetype:docx) (\"employee handbook\" OR \"personnel file\" OR ssn OR \"performance review\")",
+                        "bing": "filetype:pdf \"employee handbook\"",
+                        "duckduckgo": "filetype:pdf employee handbook"
+                    },
+                    "legalBoundary": "HR documents contain PII. GDPR/CCPA violations may apply.",
+                    "tags": [
+                        "hr",
+                        "personnel",
+                        "pii"
+                    ]
+                },
+                {
+                    "id": "legal_docs",
+                    "name": "Legal Documents",
+                    "intent": "Find contracts, NDAs, and legal filings",
+                    "operators": [
+                        "filetype",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "pdf"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "non-disclosure agreement"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "nda"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "master service agreement"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "terms and conditions"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:pdf (\"non-disclosure agreement\" OR nda OR \"master service agreement\")",
+                        "bing": "filetype:pdf nda",
+                        "duckduckgo": "filetype:pdf nda"
+                    },
+                    "legalBoundary": "Legal documents reveal business relationships and obligations.",
+                    "tags": [
+                        "legal",
+                        "contracts",
+                        "nda"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "personnel_discovery",
+            "name": "Organization & Personnel Discovery",
+            "description": "Employee information, organizational structure, and contact details",
+            "riskLevel": "medium",
+            "ghdbCategories": [
+                "Files Containing Usernames",
+                "Advisories"
+            ],
+            "patterns": [
+                {
+                    "id": "email_harvesting",
+                    "name": "Email Address Harvesting",
+                    "intent": "Collect organizational email addresses for reconnaissance",
+                    "operators": [
+                        "site",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": "@TARGET.com"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "site:TARGET.com \"@TARGET.com\"",
+                        "bing": "site:TARGET.com \"@TARGET.com\"",
+                        "duckduckgo": "site:TARGET.com @TARGET.com"
+                    },
+                    "legalBoundary": "Email harvesting for spam is illegal. OSINT collection requires legitimate purpose.",
+                    "tags": [
+                        "email",
+                        "contact",
+                        "reconnaissance"
+                    ]
+                },
+                {
+                    "id": "linkedin_profiles",
+                    "name": "LinkedIn Employee Profiles",
+                    "intent": "Find employees on LinkedIn for organizational mapping",
+                    "operators": [
+                        "site",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "site",
+                                "value": "linkedin.com/in"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": "TARGET Company"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "site:linkedin.com/in \"TARGET Company\"",
+                        "bing": "site:linkedin.com/in \"TARGET Company\"",
+                        "duckduckgo": "site:linkedin.com TARGET Company"
+                    },
+                    "legalBoundary": "LinkedIn data scraping violates ToS. Use for manual review only.",
+                    "tags": [
+                        "linkedin",
+                        "social",
+                        "employees"
+                    ]
+                },
+                {
+                    "id": "github_emails",
+                    "name": "GitHub Commit Emails",
+                    "intent": "Find developer emails from public commit history",
+                    "operators": [
+                        "site",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "site",
+                                "value": "github.com"
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": "@TARGET.com"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "site:github.com \"@TARGET.com\"",
+                        "bing": "site:github.com \"@TARGET.com\"",
+                        "duckduckgo": "site:github.com @TARGET.com"
+                    },
+                    "legalBoundary": "Git commit emails are public. May reveal employee coding activities.",
+                    "tags": [
+                        "github",
+                        "developer",
+                        "email"
+                    ]
+                },
+                {
+                    "id": "org_chart",
+                    "name": "Organizational Directory",
+                    "intent": "Find employee directories and organizational charts",
+                    "operators": [
+                        "site",
+                        "intitle"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "site",
+                                "value": "TARGET.com"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "directory"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "team"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "staff"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "about us"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "site:TARGET.com (intitle:directory OR intitle:team OR intitle:staff OR intitle:\"about us\")",
+                        "bing": "site:TARGET.com intitle:team",
+                        "duckduckgo": "site:TARGET.com team"
+                    },
+                    "legalBoundary": "Public organizational data. Useful for social engineering awareness.",
+                    "tags": [
+                        "directory",
+                        "organization",
+                        "structure"
+                    ]
+                },
+                {
+                    "id": "resume_discovery",
+                    "name": "Employee Resumes",
+                    "intent": "Find employee resumes revealing skills and internal systems",
+                    "operators": [
+                        "filetype",
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "filetype",
+                                "value": "pdf"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "TERM",
+                                        "value": "resume"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "cv"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "PHRASE",
+                                "value": "TARGET Company"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "filetype:pdf (resume OR cv) \"TARGET Company\"",
+                        "bing": "filetype:pdf resume \"TARGET Company\"",
+                        "duckduckgo": "filetype:pdf resume TARGET"
+                    },
+                    "legalBoundary": "Resumes contain PII. Collection should be for authorized purposes.",
+                    "tags": [
+                        "resume",
+                        "cv",
+                        "personnel"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "cloud_exposure",
+            "name": "Cloud Storage Exposure",
+            "description": "Misconfigured cloud storage buckets and CDN origins",
+            "riskLevel": "critical",
+            "ghdbCategories": [
+                "Files Containing Juicy Info"
+            ],
+            "patterns": [
+                {
+                    "id": "s3_buckets",
+                    "name": "AWS S3 Bucket Listings",
+                    "intent": "Find publicly accessible S3 buckets with sensitive content",
+                    "operators": [
+                        "site",
+                        "intitle"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "site",
+                                "value": "s3.amazonaws.com"
+                            },
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "index of"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "backup"
+                                    },
+                                    {
+                                        "type": "TERM",
+                                        "value": "private"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "site:s3.amazonaws.com (intitle:\"index of\" OR backup OR private)",
+                        "bing": "site:s3.amazonaws.com backup",
+                        "duckduckgo": "site:s3.amazonaws.com backup"
+                    },
+                    "legalBoundary": "S3 bucket access may violate CFAA even if misconfigured. Report to AWS.",
+                    "tags": [
+                        "aws",
+                        "s3",
+                        "cloud"
+                    ]
+                },
+                {
+                    "id": "gcs_buckets",
+                    "name": "Google Cloud Storage",
+                    "intent": "Find publicly accessible GCS buckets",
+                    "operators": [
+                        "site"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "site",
+                                "value": "storage.googleapis.com"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "site:storage.googleapis.com",
+                        "bing": "site:storage.googleapis.com",
+                        "duckduckgo": "site:storage.googleapis.com"
+                    },
+                    "legalBoundary": "GCS access controls may be misconfigured. Report to project owner.",
+                    "tags": [
+                        "gcp",
+                        "gcs",
+                        "cloud"
+                    ]
+                },
+                {
+                    "id": "azure_blobs",
+                    "name": "Azure Blob Storage",
+                    "intent": "Find publicly accessible Azure storage containers",
+                    "operators": [
+                        "site"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "site",
+                                "value": "blob.core.windows.net"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "site:blob.core.windows.net",
+                        "bing": "site:blob.core.windows.net",
+                        "duckduckgo": "site:blob.core.windows.net"
+                    },
+                    "legalBoundary": "Azure blob access may require enumeration. Respect access controls.",
+                    "tags": [
+                        "azure",
+                        "blob",
+                        "cloud"
+                    ]
+                },
+                {
+                    "id": "firebase_storage",
+                    "name": "Firebase Storage",
+                    "intent": "Find exposed Firebase storage instances",
+                    "operators": [
+                        "site"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OPERATOR",
+                                "operator": "site",
+                                "value": "firebasestorage.googleapis.com"
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "site:firebasestorage.googleapis.com",
+                        "bing": "site:firebasestorage.googleapis.com",
+                        "duckduckgo": "site:firebasestorage.googleapis.com"
+                    },
+                    "legalBoundary": "Firebase often stores mobile app data. May contain user PII.",
+                    "tags": [
+                        "firebase",
+                        "mobile",
+                        "cloud"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "vulnerability_indicators",
+            "name": "Vulnerability Indicators",
+            "description": "Error messages, debug outputs, and vulnerability signatures",
+            "riskLevel": "high",
+            "ghdbCategories": [
+                "Error Messages",
+                "Vulnerable Servers"
+            ],
+            "patterns": [
+                {
+                    "id": "sql_errors",
+                    "name": "SQL Error Messages",
+                    "intent": "Find SQL injection indicators from error messages",
+                    "operators": [
+                        "intext"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "SQL syntax"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "mysql_fetch"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "ORA-"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "PostgreSQL ERROR"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "\"SQL syntax\" OR \"mysql_fetch\" OR \"ORA-\" OR \"PostgreSQL ERROR\"",
+                        "bing": "\"SQL syntax\" OR \"mysql_fetch\"",
+                        "duckduckgo": "\"SQL syntax\""
+                    },
+                    "legalBoundary": "Error messages indicate potential SQLi. Do not attempt exploitation.",
+                    "tags": [
+                        "sqli",
+                        "error",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "phpinfo_pages",
+                    "name": "phpinfo() Pages",
+                    "intent": "Find exposed PHP configuration pages revealing server details",
+                    "operators": [
+                        "intitle",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "phpinfo()"
+                                    },
+                                    {
+                                        "type": "AND",
+                                        "children": [
+                                            {
+                                                "type": "OPERATOR",
+                                                "operator": "inurl",
+                                                "value": "phpinfo"
+                                            },
+                                            {
+                                                "type": "PHRASE",
+                                                "value": "PHP Version"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:\"phpinfo()\" OR (inurl:phpinfo \"PHP Version\")",
+                        "bing": "intitle:\"phpinfo()\"",
+                        "duckduckgo": "intitle:phpinfo"
+                    },
+                    "legalBoundary": "phpinfo reveals server configuration and potential vulnerabilities.",
+                    "tags": [
+                        "php",
+                        "config",
+                        "fingerprint"
+                    ]
+                },
+                {
+                    "id": "debug_modes",
+                    "name": "Debug Mode Enabled",
+                    "intent": "Find applications running in debug mode with verbose errors",
+                    "operators": [
+                        "intext",
+                        "intitle"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "DEBUG = True"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "debug mode"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "stack trace"
+                                    },
+                                    {
+                                        "type": "PHRASE",
+                                        "value": "Traceback (most recent call last)"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "\"DEBUG = True\" OR \"debug mode\" OR \"stack trace\" OR \"Traceback (most recent call last)\"",
+                        "bing": "\"DEBUG = True\" OR \"stack trace\"",
+                        "duckduckgo": "\"DEBUG = True\""
+                    },
+                    "legalBoundary": "Debug mode reveals application internals. Report to developers.",
+                    "tags": [
+                        "debug",
+                        "error",
+                        "development"
+                    ]
+                },
+                {
+                    "id": "server_status",
+                    "name": "Server Status Pages",
+                    "intent": "Find exposed Apache/Nginx status pages",
+                    "operators": [
+                        "intitle",
+                        "inurl"
+                    ],
+                    "astTemplate": {
+                        "type": "ROOT",
+                        "children": [
+                            {
+                                "type": "OR",
+                                "children": [
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "intitle",
+                                        "value": "Apache Status"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/server-status"
+                                    },
+                                    {
+                                        "type": "OPERATOR",
+                                        "operator": "inurl",
+                                        "value": "/nginx_status"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "compiledExamples": {
+                        "google": "intitle:\"Apache Status\" OR inurl:/server-status OR inurl:/nginx_status",
+                        "bing": "intitle:\"Apache Status\" OR inurl:/server-status",
+                        "duckduckgo": "intitle:\"Apache Status\""
+                    },
+                    "legalBoundary": "Status pages reveal active connections and internal IPs.",
+                    "tags": [
+                        "apache",
+                        "nginx",
+                        "status"
+                    ]
+                }
+            ]
+        }
+    ]
+}

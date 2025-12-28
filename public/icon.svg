@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Gradient for main elements -->
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff9500"/>
+      <stop offset="100%" stop-color="#e87400"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5e5"/>
+      <stop offset="100%" stop-color="#00c8c8"/>
+    </linearGradient>
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#0c0a08" stroke="url(#amberGrad)" stroke-width="4"/>
+  
+  <!-- Topographic-style rings -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#2a2520" stroke-width="1" opacity="0.5"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#2a2520" stroke-width="1" opacity="0.4"/>
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#2a2520" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Crosshairs -->
+  <line x1="256" y1="80" x2="256" y2="180" stroke="url(#cyanGrad)" stroke-width="2" opacity="0.6"/>
+  <line x1="256" y1="332" x2="256" y2="432" stroke="url(#cyanGrad)" stroke-width="2" opacity="0.6"/>
+  <line x1="80" y1="256" x2="180" y2="256" stroke="url(#cyanGrad)" stroke-width="2" opacity="0.6"/>
+  <line x1="332" y1="256" x2="432" y2="256" stroke="url(#cyanGrad)" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Corner brackets (tactical HUD style) -->
+  <path d="M100 140 L100 100 L140 100" fill="none" stroke="url(#amberGrad)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M412 140 L412 100 L372 100" fill="none" stroke="url(#amberGrad)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M100 372 L100 412 L140 412" fill="none" stroke="url(#amberGrad)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M412 372 L412 412 L372 412" fill="none" stroke="url(#amberGrad)" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Magnifying glass (search/OSINT symbol) -->
+  <g filter="url(#glow)">
+    <!-- Glass circle -->
+    <circle cx="230" cy="230" r="80" fill="none" stroke="url(#amberGrad)" stroke-width="12"/>
+    <!-- Handle -->
+    <line x1="290" y1="290" x2="370" y2="370" stroke="url(#amberGrad)" stroke-width="16" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Code/AST brackets inside magnifying glass -->
+  <g fill="url(#cyanGrad)" filter="url(#glow)">
+    <!-- Left bracket < -->
+    <path d="M200 230 L175 200 L175 260 Z" opacity="0.9"/>
+    <!-- Right bracket > -->
+    <path d="M260 230 L285 200 L285 260 Z" opacity="0.9"/>
+    <!-- Center dot (data point) -->
+    <circle cx="230" cy="230" r="8"/>
+  </g>
+  
+  <!-- Scanning line effect -->
+  <line x1="150" y1="230" x2="310" y2="230" stroke="url(#cyanGrad)" stroke-width="2" opacity="0.4">
+    <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite"/>
+  </line>
+</svg>

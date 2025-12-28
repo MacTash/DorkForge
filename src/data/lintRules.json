@@ -1,0 +1,488 @@
+{
+    "version": "2025.1",
+    "rules": [
+        {
+            "id": "EXCLUSIVE_OPERATOR_MIX",
+            "severity": "error",
+            "title": "Exclusive Operator Conflict",
+            "description": "allinurl, allintitle, and allintext operators cannot be combined with other operators",
+            "rationale": "Google treats these as exclusive operators that ignore other search modifiers",
+            "check": {
+                "condition": "hasExclusiveOperator && hasOtherOperators",
+                "exclusiveOperators": [
+                    "allinurl",
+                    "allintitle",
+                    "allintext"
+                ]
+            },
+            "message": "Cannot combine {operator} with other operators. Use multiple {singleOperator} instead.",
+            "suggestion": "Replace 'allinurl:admin login' with 'inurl:admin inurl:login'",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "QUERY_LENGTH_LIMIT",
+            "severity": "warning",
+            "title": "Query Length Exceeded",
+            "description": "Query exceeds the effective word limit for search engines",
+            "rationale": "Google effectively processes ~32 words. Excess terms may be ignored.",
+            "check": {
+                "condition": "wordCount > threshold",
+                "threshold": 32
+            },
+            "message": "Query has {wordCount} words. Google may ignore terms beyond ~32 words.",
+            "suggestion": "Split into multiple focused queries or remove less critical terms",
+            "affectedEngines": [
+                "google",
+                "bing"
+            ]
+        },
+        {
+            "id": "QUERY_CHAR_LIMIT",
+            "severity": "warning",
+            "title": "Query Character Limit",
+            "description": "Query exceeds recommended character limit",
+            "rationale": "URLs have practical length limits. Very long queries may be truncated.",
+            "check": {
+                "condition": "charCount > threshold",
+                "threshold": 2048
+            },
+            "message": "Query is {charCount} characters. May be truncated by search engine.",
+            "suggestion": "Reduce query complexity or split into multiple searches",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "EXCESSIVE_OR_DEPTH",
+            "severity": "warning",
+            "title": "Excessive OR List",
+            "description": "OR lists with many terms may cause unpredictable results",
+            "rationale": "Google may truncate or simplify queries with >5 OR terms",
+            "check": {
+                "condition": "orListLength > threshold",
+                "threshold": 5
+            },
+            "message": "OR list has {termCount} terms. Results may be unpredictable beyond 5 terms.",
+            "suggestion": "Split into multiple queries or prioritize most important terms",
+            "affectedEngines": [
+                "google"
+            ]
+        },
+        {
+            "id": "UNSUPPORTED_OPERATOR",
+            "severity": "error",
+            "title": "Unsupported Operator",
+            "description": "Operator is not supported by the target search engine",
+            "rationale": "Different search engines support different operator syntaxes",
+            "check": {
+                "condition": "operatorNotInSupportedList"
+            },
+            "message": "{operator} is not supported by {engine}. Query will not work as expected.",
+            "suggestion": "Remove operator or switch to a supported alternative",
+            "operatorSupport": {
+                "google": [
+                    "site",
+                    "inurl",
+                    "intitle",
+                    "intext",
+                    "filetype",
+                    "ext",
+                    "cache",
+                    "related",
+                    "before",
+                    "after",
+                    "allinurl",
+                    "allintitle",
+                    "allintext"
+                ],
+                "bing": [
+                    "site",
+                    "inurl",
+                    "intitle",
+                    "inbody",
+                    "filetype",
+                    "ext",
+                    "contains",
+                    "loc",
+                    "language"
+                ],
+                "duckduckgo": [
+                    "site",
+                    "inurl",
+                    "intitle",
+                    "filetype",
+                    "ext"
+                ]
+            },
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "OPERATOR_DEPRECATION",
+            "severity": "info",
+            "title": "Deprecated Operator",
+            "description": "Operator functionality has been reduced or deprecated",
+            "rationale": "Some operators like cache: have reduced functionality in 2025",
+            "check": {
+                "condition": "operatorInDeprecatedList"
+            },
+            "deprecatedOperators": [
+                {
+                    "operator": "cache",
+                    "status": "reduced",
+                    "note": "Google is phasing out cache: in favor of Internet Archive links"
+                },
+                {
+                    "operator": "info",
+                    "status": "deprecated",
+                    "note": "Largely superseded by other operators"
+                },
+                {
+                    "operator": "link",
+                    "status": "removed",
+                    "note": "Removed in 2017, no longer functional"
+                }
+            ],
+            "message": "{operator} has {status} functionality. {note}",
+            "suggestion": "Consider alternative approaches for this information",
+            "affectedEngines": [
+                "google"
+            ]
+        },
+        {
+            "id": "MISSING_SITE_SCOPE",
+            "severity": "info",
+            "title": "Broad Query Warning",
+            "description": "Query has no site: restriction and may return excessive results",
+            "rationale": "Unscoped queries return global results, which may not be useful for targeted OSINT",
+            "check": {
+                "condition": "noSiteOperator && hasSensitiveTerms"
+            },
+            "message": "Query has no site: scope. Results will be global and may overwhelm analysis.",
+            "suggestion": "Add site:target.com to focus results on specific target",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "PHRASE_QUOTE_MISMATCH",
+            "severity": "error",
+            "title": "Unbalanced Quotes",
+            "description": "Phrase has unbalanced quotation marks",
+            "rationale": "Unbalanced quotes cause parsing errors and unexpected results",
+            "check": {
+                "condition": "quoteCount % 2 !== 0"
+            },
+            "message": "Unbalanced quotation marks in query. Phrase matching will fail.",
+            "suggestion": "Ensure all phrases have matching opening and closing quotes",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "PARENTHESIS_MISMATCH",
+            "severity": "error",
+            "title": "Unbalanced Parentheses",
+            "description": "Query has unbalanced parentheses for grouping",
+            "rationale": "Unbalanced parentheses break boolean grouping logic",
+            "check": {
+                "condition": "openParens !== closeParens"
+            },
+            "message": "Unbalanced parentheses: {openParens} opening, {closeParens} closing.",
+            "suggestion": "Match all opening parentheses with closing parentheses",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "EMPTY_OPERATOR_VALUE",
+            "severity": "error",
+            "title": "Empty Operator Value",
+            "description": "Operator has no value specified",
+            "rationale": "Operators require values to function",
+            "check": {
+                "condition": "operatorValue.trim() === ''"
+            },
+            "message": "{operator}: has no value. Query will fail or return unexpected results.",
+            "suggestion": "Add a value after the operator, e.g., site:example.com",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "REDUNDANT_OPERATOR",
+            "severity": "info",
+            "title": "Redundant Operator",
+            "description": "Same operator is used multiple times with same value",
+            "rationale": "Duplicate operators waste query space and add no value",
+            "check": {
+                "condition": "hasDuplicateOperatorValue"
+            },
+            "message": "Duplicate {operator}:{value} found. Remove redundant instance.",
+            "suggestion": "Remove duplicate operator to simplify query",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "ETHICAL_CREDENTIAL_SEARCH",
+            "severity": "warning",
+            "title": "Credential Search Pattern",
+            "description": "Query appears designed to find exposed credentials",
+            "rationale": "Credential discovery requires ethical handling",
+            "check": {
+                "condition": "containsCredentialTerms",
+                "credentialTerms": [
+                    "password",
+                    "passwd",
+                    "pwd",
+                    "secret",
+                    "api_key",
+                    "apikey",
+                    "token",
+                    "credential",
+                    "private_key"
+                ]
+            },
+            "message": "Query targets credential exposure. Ensure authorized use only.",
+            "suggestion": "Use findings for responsible disclosure, not exploitation",
+            "legalContext": "Accessing discovered credentials may violate CFAA/CMA even if publicly indexed",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "ETHICAL_PII_SEARCH",
+            "severity": "warning",
+            "title": "PII Search Pattern",
+            "description": "Query appears designed to find personally identifiable information",
+            "rationale": "PII collection has legal restrictions under GDPR/CCPA",
+            "check": {
+                "condition": "containsPIITerms",
+                "piiTerms": [
+                    "ssn",
+                    "social security",
+                    "passport",
+                    "dob",
+                    "date of birth",
+                    "driver license",
+                    "credit card"
+                ]
+            },
+            "message": "Query targets PII. Ensure compliance with privacy regulations.",
+            "suggestion": "Document lawful basis for PII collection under applicable regulations",
+            "legalContext": "GDPR/CCPA impose restrictions on PII processing",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "ETHICAL_ADMIN_PANEL",
+            "severity": "info",
+            "title": "Admin Panel Discovery",
+            "description": "Query targets administrative interfaces",
+            "rationale": "Admin panel discovery should be for authorized testing only",
+            "check": {
+                "condition": "containsAdminTerms",
+                "adminTerms": [
+                    "admin",
+                    "administrator",
+                    "login",
+                    "dashboard",
+                    "panel",
+                    "console",
+                    "wp-admin",
+                    "phpmyadmin"
+                ]
+            },
+            "message": "Query targets admin interfaces. Do not attempt authentication without authorization.",
+            "suggestion": "Document as attack surface finding; do not attempt access",
+            "legalContext": "Unauthorized authentication attempts may violate computer crime laws",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "MULTIPLE_SITE_OPERATORS",
+            "severity": "info",
+            "title": "Multiple Site Operators",
+            "description": "Multiple site: operators create implicit OR, not AND",
+            "rationale": "Common misunderstanding: site:a.com site:b.com returns results from EITHER domain",
+            "check": {
+                "condition": "siteOperatorCount > 1 && !hasExplicitOR"
+            },
+            "message": "Multiple site: operators found. Results will include both domains (OR behavior).",
+            "suggestion": "Use explicit (site:a.com OR site:b.com) for clarity, or run separate queries",
+            "affectedEngines": [
+                "google"
+            ]
+        },
+        {
+            "id": "WILDCARD_IN_PHRASE",
+            "severity": "info",
+            "title": "Wildcard in Phrase",
+            "description": "Asterisk wildcard used within quoted phrase",
+            "rationale": "Wildcards work differently in phrases vs. bare terms",
+            "check": {
+                "condition": "phraseContainsWildcard"
+            },
+            "message": "Wildcard (*) in phrase matches any word. Ensure this is intended.",
+            "suggestion": "\"password * admin\" matches 'password [any word] admin'",
+            "affectedEngines": [
+                "google"
+            ]
+        },
+        {
+            "id": "FILETYPE_WITHOUT_EXTENSION",
+            "severity": "warning",
+            "title": "Invalid Filetype",
+            "description": "Filetype operator value may not be a valid indexed extension",
+            "rationale": "Not all file extensions are indexed by search engines",
+            "check": {
+                "condition": "filetypeNotInKnownList"
+            },
+            "commonFiletypes": [
+                "pdf",
+                "doc",
+                "docx",
+                "xls",
+                "xlsx",
+                "ppt",
+                "pptx",
+                "txt",
+                "csv",
+                "xml",
+                "json",
+                "sql",
+                "log",
+                "conf",
+                "ini",
+                "env",
+                "yml",
+                "yaml",
+                "md",
+                "html",
+                "htm",
+                "php",
+                "asp",
+                "aspx",
+                "jsp",
+                "py",
+                "js",
+                "css",
+                "zip",
+                "tar",
+                "gz",
+                "rar",
+                "bak",
+                "old",
+                "swp"
+            ],
+            "message": "filetype:{value} may not be indexed. Common types: pdf, doc, xls, sql, log, env",
+            "suggestion": "Verify the extension is commonly indexed or test with known files",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "BOOLEAN_CASE_SENSITIVITY",
+            "severity": "error",
+            "title": "Boolean Operator Case",
+            "description": "Boolean operators must be uppercase",
+            "rationale": "Lowercase 'or' and 'and' are treated as search terms, not operators",
+            "check": {
+                "condition": "hasLowercaseBoolean"
+            },
+            "message": "Boolean operators must be uppercase: OR, AND, NOT. Found lowercase '{operator}'.",
+            "suggestion": "Use 'term1 OR term2' not 'term1 or term2'",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "NEGATION_SCOPE",
+            "severity": "info",
+            "title": "Negation Scope Warning",
+            "description": "Negation operator (-) only applies to immediately following term",
+            "rationale": "'-term1 term2' negates only term1, not both terms",
+            "check": {
+                "condition": "hasNegation && mayHaveAmbiguousScope"
+            },
+            "message": "Negation (-) applies only to the immediate next term. '-term1 term2' ≠ '-(term1 term2)'",
+            "suggestion": "Use '-(term1 OR term2)' to negate multiple terms, or '-term1 -term2' for each",
+            "affectedEngines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ]
+        },
+        {
+            "id": "INURL_ENCODING",
+            "severity": "info",
+            "title": "URL Encoding in inurl",
+            "description": "Special characters in inurl: may need consideration",
+            "rationale": "URL-encoded characters may or may not match depending on indexing",
+            "check": {
+                "condition": "inurlContainsSpecialChars"
+            },
+            "message": "inurl: contains special characters. Matching may be inconsistent.",
+            "suggestion": "Try both encoded (%20) and unencoded (space) versions if results vary",
+            "affectedEngines": [
+                "google",
+                "bing"
+            ]
+        }
+    ],
+    "severityLevels": {
+        "error": {
+            "code": 0,
+            "label": "Error",
+            "description": "Query will fail or produce incorrect results",
+            "action": "Must fix before executing query",
+            "color": "#ef4444"
+        },
+        "warning": {
+            "code": 1,
+            "label": "Warning",
+            "description": "Query may produce unexpected or suboptimal results",
+            "action": "Review and consider modification",
+            "color": "#f59e0b"
+        },
+        "info": {
+            "code": 2,
+            "label": "Info",
+            "description": "Informational note about query behavior or ethics",
+            "action": "Be aware of implications",
+            "color": "#3b82f6"
+        }
+    }
+}
