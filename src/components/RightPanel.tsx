@@ -53,7 +53,7 @@ export function RightPanel({ queries, analysis, ast, engine }: RightPanelProps) 
             {/* Header */}
             <div className="panel-header">
                 <div>
-                    <h2 className="panel-title" style={{ color: 'var(--accent-secondary)', textShadow: '0 0 10px rgba(0,200,200,0.4)' }}>PAYLOAD OUTPUT</h2>
+                    <h2 className="panel-title" style={{ color: 'var(--accent-secondary)', textShadow: '0 0 10px rgba(0,200,200,0.4)' }}>OUTPUT</h2>
                     <p className="stats-display">
                         {analysis.charCount} CHARS | {analysis.wordCount} TOKENS
                     </p>
