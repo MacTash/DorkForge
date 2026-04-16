@@ -48,7 +48,7 @@ export function LeftPanelSimplified({ state, onUpdate }: LeftPanelProps) {
 
           <TagInput
             label="Exact phrases (must match exactly)"
-            placeholder="\"internal use only\""
+            placeholder={"\"internal use only\""}
             values={state.exactTerms}
             onChange={(v) => onUpdate('exactTerms', v)}
             helperText="Use quotes for exact matches"
