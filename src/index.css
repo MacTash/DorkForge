@@ -881,7 +881,7 @@ body {
 }
 
 .status-message {
-  font-size: 13px;
+  font-size: 20px;
   font-family: var(--font-mono);
   color: var(--text-secondary);
   white-space: nowrap;
