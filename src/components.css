@@ -1,0 +1,461 @@
+/**
+ * Additional CSS for Simplified Components
+ * Extends the existing DorkForge theme
+ */
+
+/* ============================================================================
+   Left Panel Simplified
+   ============================================================================ */
+.left-panel {
+  background: var(--bg-panel);
+  border-radius: 8px;
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  margin-bottom: 1.5rem;
+}
+
+.panel-title {
+  font-family: 'Absans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.panel-subtitle {
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-family: 'Absans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.advanced-toggle {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.toggle-button {
+  background: var(--bg-surface);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.toggle-button:hover {
+  background: var(--accent-dim);
+}
+
+.quick-help {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-primary);
+  font-size: 0.8rem;
+}
+
+.quick-help h4 {
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.quick-help ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.quick-help li {
+  padding: 0.25rem 0;
+  color: var(--text-secondary);
+}
+
+.quick-help li::before {
+  content: "•";
+  color: var(--accent);
+  margin-right: 0.5rem;
+}
+
+/* ============================================================================
+   Live Query Preview
+   ============================================================================ */
+.live-preview-panel {
+  background: var(--bg-panel);
+  border-radius: 8px;
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.preview-title {
+  font-family: 'Absans', sans-serif;
+  font-size: 1.1rem;
+  color: var(--accent-secondary);
+}
+
+.engine-badge {
+  background: var(--accent-secondary-dim);
+  color: var(--accent-secondary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.75rem;
+}
+
+.preview-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--text-secondary);
+  font-family: 'Whois Mono', monospace;
+}
+
+.preview-empty p {
+  margin: 0.5rem 0;
+}
+
+.query-display {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.query-text {
+  color: var(--text-primary);
+}
+
+.preview-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.btn-copy, .btn-search {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.btn-copy:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+}
+
+.btn-search {
+  background: var(--accent);
+  color: #000;
+  border: none;
+}
+
+.btn-search:hover {
+  background: #ff8c1a;
+}
+
+.query-stats {
+  display: flex;
+  gap: 1rem;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.stat-warning {
+  color: #ff5555;
+}
+
+.query-warnings {
+  background: rgba(255, 85, 85, 0.1);
+  border: 1px solid rgba(255, 85, 85, 0.3);
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.warning-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.8rem;
+  color: #ffaaaa;
+  margin: 0.25rem 0;
+}
+
+/* ============================================================================
+   Suggestion System
+   ============================================================================ */
+.suggestion-system {
+  background: var(--bg-panel);
+  border-radius: 8px;
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.suggestions-header {
+  margin-bottom: 1rem;
+}
+
+.suggestions-title {
+  font-family: 'Absans', sans-serif;
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.suggestions-subtitle {
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.suggestions-search input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.suggestions-search input:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+}
+
+.suggestions-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.tab-button {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  color: var(--text-primary);
+}
+
+.tab-button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.suggestions-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.suggestion-category {
+  margin-bottom: 1.5rem;
+}
+
+.category-title {
+  font-family: 'Absans', sans-serif;
+  font-size: 0.85rem;
+  color: var(--accent-secondary);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.suggestion-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.suggestion-card:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+}
+
+.suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.suggestion-title {
+  font-family: 'Absans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.apply-badge {
+  background: var(--accent);
+  color: #000;
+  padding: 0.1rem 0.5rem;
+  border-radius: 3px;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.65rem;
+}
+
+.suggestion-description {
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.suggestion-preview {
+  background: rgba(0, 200, 200, 0.1);
+  border: 1px solid var(--accent-secondary-border);
+  border-radius: 3px;
+  padding: 0.5rem;
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent-secondary);
+  word-break: break-all;
+}
+
+.no-suggestions {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--text-secondary);
+  font-family: 'Whois Mono', monospace;
+}
+
+.suggestions-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-primary);
+  font-family: 'Whois Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ============================================================================
+   Simplified Layout
+   ============================================================================ */
+.app-main.simplified {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-section {
+  flex: 1;
+  min-height: 0;
+}
+
+.suggestions-section {
+  height: 300px;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .app-main.simplified {
+    grid-template-columns: 1fr;
+  }
+
+  .left-column {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  .input-section {
+    flex: 1;
+  }
+
+  .suggestions-section {
+    width: 300px;
+    flex: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .left-column {
+    flex-direction: column;
+  }
+
+  .suggestions-section {
+    width: 100%;
+    height: 250px;
+  }
+}
