@@ -50,7 +50,6 @@ export function LeftPanelSimplified({ state, onUpdate }: LeftPanelProps) {
             placeholder={"\"internal use only\""}
             values={state.exactTerms}
             onChange={(v) => onUpdate('exactTerms', v)}
-            helperText="Use quotes for exact matches"
           />
 
           <TagInput
@@ -58,7 +57,6 @@ export function LeftPanelSimplified({ state, onUpdate }: LeftPanelProps) {
             placeholder="pdf, docx, env, sql"
             values={state.fileTypes}
             onChange={(v) => onUpdate('fileTypes', v)}
-            helperText="Filter by document type"
           />
         </section>
 
@@ -71,7 +69,6 @@ export function LeftPanelSimplified({ state, onUpdate }: LeftPanelProps) {
             placeholder="example.com, github.com"
             values={state.domains}
             onChange={(v) => onUpdate('domains', v)}
-            helperText="Search only on these sites"
           />
 
           <TagInput
@@ -79,7 +76,6 @@ export function LeftPanelSimplified({ state, onUpdate }: LeftPanelProps) {
             placeholder="github.com, pinterest.com"
             values={state.excludeTerms}
             onChange={(v) => onUpdate('excludeTerms', v)}
-            helperText="Remove these sites from results"
           />
         </section>
 
@@ -93,7 +89,6 @@ export function LeftPanelSimplified({ state, onUpdate }: LeftPanelProps) {
               placeholder="admin, login, api"
               values={state.inUrl}
               onChange={(v) => onUpdate('inUrl', v)}
-              helperText="URL must contain these words"
             />
 
             <TagInput
@@ -101,7 +96,6 @@ export function LeftPanelSimplified({ state, onUpdate }: LeftPanelProps) {
               placeholder="dashboard, index of"
               values={state.inTitle}
               onChange={(v) => onUpdate('inTitle', v)}
-              helperText="Title must contain these words"
             />
 
             <TagInput
@@ -109,7 +103,6 @@ export function LeftPanelSimplified({ state, onUpdate }: LeftPanelProps) {
               placeholder="error, warning, credentials"
               values={state.inText}
               onChange={(v) => onUpdate('inText', v)}
-              helperText="Page body must contain these words"
             />
           </section>
         )}
