@@ -43,7 +43,6 @@ export function LeftPanelSimplified({ state, onUpdate }: LeftPanelProps) {
             placeholder="password, api_key, confidential"
             values={state.broadTerms}
             onChange={(v) => onUpdate('broadTerms', v)}
-            helperText="General terms to search for"
           />
 
           <TagInput

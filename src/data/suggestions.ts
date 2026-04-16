@@ -11,6 +11,7 @@ export interface Suggestion {
   preview: string;
   actionType: string;
   actionData: any;
+  action?: () => void;  // Optional action function added at runtime
 }
 
 // ============================================================================
@@ -214,4 +215,3 @@ export function getAllSuggestions(): Suggestion[] {
   ];
 }
 
-export type { Suggestion };
